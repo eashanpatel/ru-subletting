@@ -28,7 +28,9 @@ export function ListingCard({
   active,
   onToggleSave,
   onHover,
+  href,
 }: {
+  href?: string;
   listing: BrowseListing;
   semesters: Semester[];
   range: DateRange | null;
@@ -77,7 +79,9 @@ export function ListingCard({
             {badge && <span className="sr-only">{badge}: </span>}
             <h2 className={cn("font-semibold leading-snug", inactive && "text-muted-foreground")}>
               <Link
-                href={range ? `/listings/${listing.id}?from=${range.start}&to=${range.end}` : `/listings/${listing.id}`}
+                href={
+                  href ?? (range ? `/listings/${listing.id}?from=${range.start}&to=${range.end}` : `/listings/${listing.id}`)
+                }
                 className="after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none"
               >
                 {title}

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Bookmark, Loader2, Mail, Phone, ShieldCheck } from "lucide-react";
+import { AtSign, Bookmark, Ghost, Link2, Loader2, Mail, MessageCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { useFavorites } from "@/hooks/use-favorites";
 import { type ListingStatus, formatDateRange, formatPrice } from "@/lib/browse";
+import { CONTACT_KINDS, type ContactKind, contactHref } from "@/lib/listing-form";
 
 type Props = {
   listingId: string;
@@ -75,7 +76,7 @@ export function ContactCard(props: Props) {
           <div className="h-11 animate-pulse rounded-lg bg-muted" />
         ) : isOwner ? (
           <p className="text-sm">
-            This is your listing. People who are signed in see the contact details you chose to share.
+            This is your listing. Signed-in visitors see the contact methods you added.
           </p>
         ) : !userId ? (
           <>
@@ -109,62 +110,78 @@ export function ContactCard(props: Props) {
   );
 }
 
+const CONTACT_ICONS: Record<ContactKind, typeof Mail> = {
+  email: Mail,
+  phone: MessageSquare,
+  whatsapp: MessageCircle,
+  instagram: AtSign,
+  snapchat: Ghost,
+  other: Link2,
+};
+
 function ContactDetails({ listingId, title }: { listingId: string; title: string }) {
-  const contact = useQuery({
-    queryKey: ["listing-contact", listingId],
+  const contacts = useQuery({
+    queryKey: ["listing-contacts", listingId],
     queryFn: async () => {
-      const { data, error } = await createClient().rpc("get_listing_contact", { p_listing_id: listingId });
+      const { data, error } = await createClient().rpc("get_listing_contacts", { p_listing_id: listingId });
       if (error) throw error;
-      return data?.[0] ?? null;
+      return data ?? [];
     },
   });
 
-  if (contact.isPending) {
+  if (contacts.isPending) {
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="size-4 animate-spin" aria-hidden /> Loading contact details
       </p>
     );
   }
-  if (contact.isError) {
+  if (contacts.isError) {
     return (
       <p role="alert" className="text-sm text-destructive">
         Contact details didn&apos;t load.{" "}
-        <button type="button" onClick={() => contact.refetch()} className="font-medium underline underline-offset-4">
+        <button type="button" onClick={() => contacts.refetch()} className="font-medium underline underline-offset-4">
           Try again
         </button>
       </p>
     );
   }
-
-  const email = contact.data?.contact_email;
-  const phone = contact.data?.contact_phone;
-  if (!email && !phone) {
+  if (contacts.data.length === 0) {
     return <p className="text-sm text-muted-foreground">The person subletting hasn&apos;t shared contact details yet.</p>;
   }
 
-  const subject = encodeURIComponent(`Your sublet on RU Subletting: ${title}`);
+  const subject = `Your sublet on RU Subletting: ${title}`;
   return (
-    <div className="flex flex-col gap-2">
-      {email && (
-        <a
-          href={`mailto:${email}?subject=${subject}`}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-brand-foreground hover:brightness-110 active:scale-[0.98]"
-        >
-          <Mail className="size-4" aria-hidden />
-          Email {email}
-        </a>
-      )}
-      {phone && (
-        <a
-          href={`sms:${phone}`}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-input px-4 text-sm font-semibold hover:border-foreground/40 active:scale-[0.98]"
-        >
-          <Phone className="size-4" aria-hidden />
-          Text <span className="font-mono">{phone}</span>
-        </a>
-      )}
-    </div>
+    <ul className="flex flex-col gap-2">
+      {contacts.data.map((c, i) => {
+        const Icon = CONTACT_ICONS[c.kind];
+        const href = contactHref(c.kind, c.value, subject);
+        const inner = (
+          <>
+            <Icon className="size-4 shrink-0" aria-hidden />
+            <span className="min-w-0">
+              <span className="block text-xs font-normal opacity-80">{CONTACT_KINDS[c.kind].label}</span>
+              <span className="block truncate font-mono text-sm">{c.value}</span>
+            </span>
+          </>
+        );
+        const cls = cn(
+          "flex min-h-12 items-center gap-3 rounded-lg px-4 py-2 text-left font-semibold",
+          i === 0 ? "bg-brand text-brand-foreground hover:brightness-110" : "border border-input hover:border-foreground/40",
+        );
+        return (
+          <li key={`${c.kind}-${i}`}>
+            {href ? (
+              <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>
+                {inner}
+              </a>
+            ) : (
+              <div className={cls}>{inner}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

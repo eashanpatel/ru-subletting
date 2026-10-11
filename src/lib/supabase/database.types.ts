@@ -152,6 +152,38 @@ export type Database = {
           },
         ]
       }
+      listing_contact_methods: {
+        Row: {
+          id: string
+          kind: Database["public"]["Enums"]["contact_kind"]
+          listing_id: string
+          position: number
+          value: string
+        }
+        Insert: {
+          id?: string
+          kind: Database["public"]["Enums"]["contact_kind"]
+          listing_id: string
+          position?: number
+          value: string
+        }
+        Update: {
+          id?: string
+          kind?: Database["public"]["Enums"]["contact_kind"]
+          listing_id?: string
+          position?: number
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_contact_methods_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_locations: {
         Row: {
           address: string
@@ -225,8 +257,6 @@ export type Database = {
           price_monthly: number
           room_type: Database["public"]["Enums"]["room_type"]
           school_id: string
-          show_email: boolean
-          show_phone: boolean
           starts_on: string
           status: Database["public"]["Enums"]["listing_status"]
           street_name: string | null
@@ -248,8 +278,6 @@ export type Database = {
           price_monthly: number
           room_type: Database["public"]["Enums"]["room_type"]
           school_id: string
-          show_email?: boolean
-          show_phone?: boolean
           starts_on: string
           status?: Database["public"]["Enums"]["listing_status"]
           street_name?: string | null
@@ -271,8 +299,6 @@ export type Database = {
           price_monthly?: number
           room_type?: Database["public"]["Enums"]["room_type"]
           school_id?: string
-          show_email?: boolean
-          show_phone?: boolean
           starts_on?: string
           status?: Database["public"]["Enums"]["listing_status"]
           street_name?: string | null
@@ -503,13 +529,14 @@ export type Database = {
           unit_label: string
         }[]
       }
-      get_listing_contact: {
+      get_listing_contacts: {
         Args: { p_listing_id: string }
         Returns: {
-          contact_email: string
-          contact_phone: string
+          kind: Database["public"]["Enums"]["contact_kind"]
+          value: string
         }[]
       }
+      get_listing_for_edit: { Args: { p_listing_id: string }; Returns: Json }
       get_listing_location: {
         Args: { p_listing_id: string }
         Returns: {
@@ -517,6 +544,31 @@ export type Database = {
           lat: number
           lng: number
         }[]
+      }
+      save_listing: {
+        Args: {
+          p_address: string
+          p_amenities: string[]
+          p_baths: number
+          p_beds: number
+          p_contacts: Json
+          p_description: string
+          p_ends_on: string
+          p_id: string
+          p_lat: number
+          p_lng: number
+          p_neighborhood: string
+          p_photos: string[]
+          p_price: number
+          p_room_type: Database["public"]["Enums"]["room_type"]
+          p_school?: string
+          p_starts_on: string
+          p_status: Database["public"]["Enums"]["listing_status"]
+          p_street_name: string
+          p_title: string
+          p_unit_label: string
+        }
+        Returns: string
       }
       search_listings: {
         Args: {
@@ -565,6 +617,13 @@ export type Database = {
       }
     }
     Enums: {
+      contact_kind:
+        | "email"
+        | "phone"
+        | "whatsapp"
+        | "instagram"
+        | "snapchat"
+        | "other"
       listing_status: "draft" | "active" | "paused" | "taken"
       room_type: "private_room" | "shared_room" | "entire_place" | "studio"
     }
@@ -697,6 +756,14 @@ export const Constants = {
   },
   public: {
     Enums: {
+      contact_kind: [
+        "email",
+        "phone",
+        "whatsapp",
+        "instagram",
+        "snapchat",
+        "other",
+      ],
       listing_status: ["draft", "active", "paused", "taken"],
       room_type: ["private_room", "shared_room", "entire_place", "studio"],
     },

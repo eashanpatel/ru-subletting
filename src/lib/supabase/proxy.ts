@@ -33,7 +33,8 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const signedIn = !!data?.claims;
-  const needsAccount = PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const needsAccount =
+    PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`)) || /^\/listings\/[^/]+\/edit$/.test(pathname);
 
   // Signed out on an account page -> sign in. Signed in on /sign-in -> browse.
   const target = !signedIn && needsAccount ? "/sign-in" : signedIn && pathname === "/sign-in" ? "/" : null;

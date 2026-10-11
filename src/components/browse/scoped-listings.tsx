@@ -8,6 +8,7 @@ import { useSession } from "@/hooks/use-session";
 import { useFavorites } from "@/hooks/use-favorites";
 import { type ReferenceData, SCHOOL_SLUG, toBrowseListing } from "@/lib/browse";
 import { ListingCard, ListingCardSkeleton } from "./listing-card";
+import { ManageListing } from "@/components/post/manage-listing";
 
 const COPY = {
   saved: {
@@ -87,16 +88,29 @@ export function ScopedListings({ scope, reference }: { scope: "saved" | "mine"; 
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {query.data.map((l) => (
-        <ListingCard
-          key={l.id}
-          listing={l}
-          semesters={reference.semesters}
-          range={null}
-          saved={savedIds.has(l.id)}
-          onToggleSave={scope === "saved" ? () => toggle.mutate({ listingId: l.id, save: !savedIds.has(l.id) }) : undefined}
-        />
-      ))}
+      {query.data.map((l) =>
+        scope === "mine" ? (
+          <div key={l.id} className="flex flex-col">
+            <ListingCard
+              listing={l}
+              semesters={reference.semesters}
+              range={null}
+              saved={false}
+              href={l.status === "active" || l.status === "taken" ? `/listings/${l.id}` : `/listings/${l.id}/edit`}
+            />
+            <ManageListing id={l.id} status={l.status} />
+          </div>
+        ) : (
+          <ListingCard
+            key={l.id}
+            listing={l}
+            semesters={reference.semesters}
+            range={null}
+            saved={savedIds.has(l.id)}
+            onToggleSave={() => toggle.mutate({ listingId: l.id, save: !savedIds.has(l.id) })}
+          />
+        ),
+      )}
     </div>
   );
 }

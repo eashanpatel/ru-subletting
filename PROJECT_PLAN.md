@@ -60,7 +60,7 @@ Server components handle the first render of pages that need SEO and link previe
 ### 4. Listing detail page
 - Photo gallery, full details, map location, owner info
 - **Contact:** the owner chooses which contact methods to show, visible to logged-in users only. This stands in for in-app messaging for now.
-  - **Planned (with the Post a sublet form):** let the lister add any of email, phone, Instagram, WhatsApp, Snapchat, or another method, each optional. Schema change: replace `profile_contacts` email/phone + listing `show_email`/`show_phone` with a per-listing `listing_contact_methods` table (listing_id, kind enum, value, position), still exposed only through a signed-in-only function. The contact card renders one button per method (deep links: wa.me, instagram.com, snapchat.com/add, sms:, mailto:).
+  - **Built:** the lister adds any of email, phone, Instagram, WhatsApp, Snapchat, or another method, each optional. Schema change: replace `profile_contacts` email/phone + listing `show_email`/`show_phone` with a per-listing `listing_contact_methods` table (listing_id, kind enum, value, position), still exposed only through a signed-in-only function. The contact card renders one button per method (deep links: wa.me, instagram.com, snapchat.com/add, sms:, mailto:).
 
 ### 5. Saved listings (favorites)
 
@@ -129,7 +129,8 @@ With no `.edu` requirement and no email verification, the MVP relies on:
 3. ~~Write the Supabase schema~~ Applied to the hosted project (`supabase/migrations/`). Exact addresses live in `listing_locations` (signed-in only); listings carry a ~100 m rounded point. Contact info is private and shared via `get_listing_contact()`. Browse queries go through `search_listings()`.
 4. Real data: browse, Saved, and My listings read from Supabase via `search_listings()`; the map is Mapbox GL; saving writes to `favorites`. Dev demo listings: `supabase/dev/` (load and remove scripts). `/saved`, `/my-listings`, `/listings/new` redirect to sign-in when signed out. Light mode only for now.
 5. Listing page `/listings/[id]`: gallery, semester timeline, commute to every campus, amenities, description, location (approximate for everyone, exact address when signed in), owner, report form, and a contact card (sign-in required; shows only what the owner chose to share). Data via `get_listing()` / `get_listing_location()`.
-6. Auth wiring done: Supabase clients in `src/lib/supabase/`, session refresh in `src/proxy.ts`, `/sign-in` (Google + email/password), `/auth/callback`, `/auth/sign-out`.
+6. Post a sublet (`/listings/new`) and edit (`/listings/[id]/edit`): room type, building, beds/baths, dates (calendar + semester presets), rent, Mapbox address search, neighborhood, photo upload (browser-compressed, reorderable, cover first), amenities, description, contact methods (email, phone, WhatsApp, Instagram, Snapchat, other), live browse-card preview, save draft or publish. Saved through `save_listing()` in one transaction via a server action that also prunes removed photos and refreshes the listing cache. My listings: edit, view, pause/resume, mark taken/relist, delete.
+7. Auth wiring done: Supabase clients in `src/lib/supabase/`, session refresh in `src/proxy.ts`, `/sign-in` (Google + email/password), `/auth/callback`, `/auth/sign-out`.
 
 ## Accounts the owner needs to set up
 - A Supabase project (with PostGIS enabled)
