@@ -10,7 +10,7 @@ import { ContactCard, MobileContactBar } from "@/components/listing/contact-card
 import { ListingLocation } from "@/components/listing/listing-location";
 import { PhotoGallery } from "@/components/listing/photo-gallery";
 import { ReportListing } from "@/components/listing/report-listing";
-import { SemesterTimeline } from "@/components/listing/semester-timeline";
+import { ListingDates } from "@/components/listing/listing-dates";
 import { ROOM_TYPE_LABEL, formatDateRange, formatPrice } from "@/lib/browse";
 import { getListing } from "@/lib/listing";
 import { getReferenceData } from "@/lib/reference-data";
@@ -111,7 +111,7 @@ async function ListingContent({ params }: { params: Params }) {
                 about {weeks} {weeks === 1 ? "week" : "weeks"}
               </span>
             </p>
-            <SemesterTimeline start={listing.start} end={listing.end} semesters={reference.semesters} />
+            <ListingDates start={listing.start} end={listing.end} semesters={reference.semesters} />
           </Section>
 
           <Section title="Getting to campus">

@@ -59,7 +59,8 @@ Server components handle the first render of pages that need SEO and link previe
 
 ### 4. Listing detail page
 - Photo gallery, full details, map location, owner info
-- **Contact:** the owner chooses whether to show their email and/or phone. It's visible to logged-in users only and stands in for in-app messaging for now.
+- **Contact:** the owner chooses which contact methods to show, visible to logged-in users only. This stands in for in-app messaging for now.
+  - **Planned (with the Post a sublet form):** let the lister add any of email, phone, Instagram, WhatsApp, Snapchat, or another method, each optional. Schema change: replace `profile_contacts` email/phone + listing `show_email`/`show_phone` with a per-listing `listing_contact_methods` table (listing_id, kind enum, value, position), still exposed only through a signed-in-only function. The contact card renders one button per method (deep links: wa.me, instagram.com, snapchat.com/add, sms:, mailto:).
 
 ### 5. Saved listings (favorites)
 

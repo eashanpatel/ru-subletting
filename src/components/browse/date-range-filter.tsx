@@ -18,17 +18,19 @@ export function DateRangeFilter({
   value,
   semesters,
   onChange,
+  label = "When",
 }: {
   value: DateRange | null;
   semesters: Semester[];
   onChange: (value: DateRange | null) => void;
+  label?: string;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className={chipClass(!!value)}>
-        <span className={value ? "" : "text-muted-foreground"}>When</span>
+        <span className={value ? "" : "text-muted-foreground"}>{label}</span>
         <span className="font-medium">{value ? formatDateRange(value.start, value.end) : "Any dates"}</span>
         <ChevronDown className="size-4 opacity-60" aria-hidden />
       </PopoverTrigger>
