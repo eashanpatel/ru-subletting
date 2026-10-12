@@ -23,22 +23,29 @@ import { DateRangeFilter } from "./date-range-filter";
 import { FilterSelect } from "./filter-select";
 import { PriceFilter } from "./price-filter";
 import { ListingCard, ListingCardSkeleton } from "./listing-card";
-import { type Bounds, MapView } from "./map-view";
-
-type Sort = "closest" | "newest" | "price_asc" | "price_desc";
+import { MapView } from "./map-view";
+import { MapPeek } from "./map-peek";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { type Bounds, type Sort, useBrowseFilters } from "@/hooks/use-browse-filters";
 
 export function BrowseView({ reference }: { reference: ReferenceData }) {
   const { campuses, semesters, amenities: amenityList } = reference;
   const router = useRouter();
-  const [campus, setCampus] = useState("any");
-  const [dates, setDates] = useState<DateRange | null>(null);
-  const [price, setPrice] = useState<PriceRange>({ min: null, max: null });
-  const [roomType, setRoomType] = useState<RoomType | "any">("any");
-  const [amenities, setAmenities] = useState<string[]>([]);
-  const [bounds, setBounds] = useState<Bounds | null>(null);
-  const [sort, setSort] = useState<Sort>("closest");
+  const campusSlugs = useMemo(() => campuses.map((c) => c.slug), [campuses]);
+  const { filters: f, update, clear } = useBrowseFilters(campusSlugs);
+  const { campus, dates, price, roomType, amenities, bounds, sort } = f;
+  const setCampus = (campus: string) => update({ campus });
+  const setDates = (dates: DateRange | null) => update({ dates });
+  const setPrice = (price: PriceRange) => update({ price });
+  const setRoomType = (roomType: RoomType | "any") => update({ roomType });
+  const setAmenities = (next: string[] | ((prev: string[]) => string[])) =>
+    update({ amenities: typeof next === "function" ? next(amenities) : next });
+  const setBounds = (bounds: Bounds | null) => update({ bounds });
+  const setSort = (sort: Sort) => update({ sort });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [peekId, setPeekId] = useState<string | null>(null);
+  const wide = useMediaQuery("(min-width: 1024px)");
   const moreRef = useRef<HTMLDialogElement>(null);
 
   const { userId, ready } = useSession();
@@ -88,12 +95,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
   const loadingFirst = search.isPending;
 
   function clearFilters() {
-    setCampus("any");
-    setDates(null);
-    setPrice({ min: null, max: null });
-    setRoomType("any");
-    setAmenities([]);
-    setBounds(null);
+    clear();
   }
 
   function toggleSave(id: string) {
@@ -105,9 +107,13 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
     toggle.mutate({ listingId: id, save: !savedIds.has(id) });
   }
 
+  // Desktop: scroll to the card. Phone map: show a preview on the map instead of leaving it.
   function focusListing(id: string) {
     setHoveredId(id);
-    setMobileView("list");
+    if (!wide && mobileView === "map") {
+      setPeekId(id);
+      return;
+    }
     requestAnimationFrame(() =>
       document.getElementById(`listing-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }),
     );
@@ -242,10 +248,6 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
               ))}
             </div>
           )}
-
-          <p className="mt-6 text-sm text-muted-foreground">
-            RU Subletting is made by students and is not affiliated with Rutgers University.
-          </p>
         </section>
 
         {/* Map */}
@@ -253,7 +255,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
           id="map"
           tabIndex={-1}
           className={cn(
-            "lg:sticky lg:top-[7.75rem] lg:block lg:h-[calc(100dvh-7.75rem)] lg:border-l lg:border-rule",
+            "relative lg:sticky lg:top-[7.75rem] lg:block lg:h-[calc(100dvh-7.75rem)] lg:border-l lg:border-rule",
             mobileView === "map" ? "h-[calc(100dvh-7.75rem)]" : "hidden",
           )}
         >
@@ -269,6 +271,13 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
             onSearchArea={setBounds}
             onClearArea={() => setBounds(null)}
           />
+          {!wide && mobileView === "map" && peekId && results.find((l) => l.id === peekId) && (
+            <MapPeek
+              listing={results.find((l) => l.id === peekId)!}
+              range={dates}
+              onClose={() => setPeekId(null)}
+            />
+          )}
         </div>
       </main>
 

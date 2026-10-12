@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { DateRange, Semester } from "@/lib/browse";
 import { DateRangeFilter } from "@/components/browse/date-range-filter";
 import { SemesterTimeline } from "./semester-timeline";
@@ -21,7 +21,6 @@ function rangeFromParams(params: URLSearchParams): DateRange | null {
  */
 export function ListingDates({ start, end, semesters }: { start: string; end: string; semesters: Semester[] }) {
   const params = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const range = rangeFromParams(params);
 
@@ -35,7 +34,7 @@ export function ListingDates({ start, end, semesters }: { start: string; end: st
       q.delete("to");
     }
     const query = q.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    window.history.replaceState(null, "", query ? `${pathname}?${query}` : pathname);
   }
 
   return (

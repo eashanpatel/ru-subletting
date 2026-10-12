@@ -14,18 +14,25 @@ export async function HeaderAccount() {
     return <SignInLink />;
   }
 
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", claims.sub).maybeSingle();
   const meta = (claims.user_metadata ?? {}) as { full_name?: string; name?: string };
-  const label = meta.full_name || meta.name || (claims.email as string | undefined) || "Account";
+  const label = profile?.full_name || meta.full_name || meta.name || (claims.email as string | undefined) || "Account";
 
   return (
-    <form action="/auth/sign-out" method="post" className="hidden items-center gap-2 md:flex">
-      <span className="max-w-40 truncate text-sm text-muted-foreground" title={label}>
+    <div className="hidden items-center gap-1 md:flex">
+      <Link
+        href="/account"
+        className="max-w-44 truncate rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+        title={label}
+      >
         {label}
-      </span>
-      <button type="submit" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
-        Sign out
-      </button>
-    </form>
+      </Link>
+      <form action="/auth/sign-out" method="post">
+        <button type="submit" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+          Sign out
+        </button>
+      </form>
+    </div>
   );
 }
 

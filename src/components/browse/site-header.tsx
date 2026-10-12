@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Menu, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { HeaderAccount, SignInLink } from "./header-account";
+import { MobileMenu } from "./mobile-menu";
 
 const NAV = [
   { href: "/", label: "Browse" },
@@ -46,13 +47,7 @@ export function SiteHeader({ current = "/" }: { current?: string }) {
             <span className="sm:hidden">Post</span>
             <span className="hidden sm:inline">Post a sublet</span>
           </Link>
-          <button
-            type="button"
-            className="-mr-2 inline-flex size-10 items-center justify-center rounded-lg hover:bg-muted md:hidden"
-            aria-label="Open menu"
-          >
-            <Menu className="size-5" aria-hidden />
-          </button>
+          <MobileMenu current={current} />
         </div>
       </div>
     </header>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -140,9 +141,16 @@ export function AuthForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-sm font-medium">
-            Password
-          </label>
+          <div className="flex items-baseline justify-between">
+            <label htmlFor="password" className="text-sm font-medium">
+              Password
+            </label>
+            {mode === "sign-in" && (
+              <Link href="/forgot-password" className="text-sm font-medium text-brand underline-offset-4 hover:underline">
+                Forgot password?
+              </Link>
+            )}
+          </div>
           <input
             id="password"
             type="password"

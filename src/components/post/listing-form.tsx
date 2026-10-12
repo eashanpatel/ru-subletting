@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Circle, Loader2 } from "lucide-react";
@@ -45,8 +46,10 @@ export function ListingForm({
   mode: "new" | "edit";
 }) {
   const router = useRouter();
-  const [saving, startSaving] = useTransition();
+  const queryClient = useQueryClient();
+  // Which button is saving. Cleared on any failure; on success the page navigates away.
   const [pendingIntent, setPendingIntent] = useState<ListingFormValues["intent"] | null>(null);
+  const saving = pendingIntent != null;
   const [serverError, setServerError] = useState<string | null>(null);
   const [now] = useState(() => new Date().toISOString());
 
@@ -111,21 +114,33 @@ export function ListingForm({
   ];
 
   function submit(intent: ListingFormValues["intent"]) {
+    if (saving) return;
     setServerError(null);
     setValue("intent", intent);
     setPendingIntent(intent);
     handleSubmit(
-      (values) =>
-        startSaving(async () => {
-          const result = await saveListing(values);
-          if (!result.ok) {
-            setServerError(result.error);
-            setPendingIntent(null);
-            return;
-          }
-          router.push(result.status === "active" ? `/listings/${result.id}` : "/my-listings");
-          router.refresh();
-        }),
+      async (values) => {
+        let result: Awaited<ReturnType<typeof saveListing>>;
+        try {
+          result = await saveListing(values);
+        } catch {
+          setServerError("We couldn't reach the server. Check your connection and try again.");
+          setPendingIntent(null);
+          return;
+        }
+        if (!result.ok) {
+          setServerError(result.error);
+          setPendingIntent(null);
+          return;
+        }
+        // My listings and the edit form read through React Query; drop their cached copies.
+        // The listing page itself was refreshed by the server action (updateTag).
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["listings"] }),
+          queryClient.removeQueries({ queryKey: ["listing-edit", result.id] }),
+        ]);
+        router.push(result.status === "active" ? `/listings/${result.id}` : "/my-listings");
+      },
       () => {
         setPendingIntent(null);
         requestAnimationFrame(() => document.querySelector<HTMLElement>("[aria-invalid=true]")?.focus());
@@ -133,7 +148,7 @@ export function ListingForm({
     )();
   }
 
-  const busy = saving || pendingIntent != null;
+  const busy = saving;
 
   return (
     <form

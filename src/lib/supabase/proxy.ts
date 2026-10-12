@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 /** Pages that need an account. Signed-out visitors go to /sign-in. */
-const PROTECTED = ["/saved", "/my-listings", "/listings/new"];
+const PROTECTED = ["/saved", "/my-listings", "/listings/new", "/account"];
 
 /** Refreshes the Supabase session cookie and guards account-only pages. */
 export async function updateSession(request: NextRequest) {
