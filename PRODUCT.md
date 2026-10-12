@@ -54,7 +54,7 @@ The full scope, stack, data model, and roadmap are in `PROJECT_PLAN.md`. Durable
 - **Listings:** photos, title, description, price per month, available dates, beds/baths, address, neighborhood, and amenities. Owners can create, edit, pause, and delete their own listings.
 - **Discovery:** a listing grid synced with a map, filters, sort options, search within the visible map area, and favorites.
 - **Trust and safety:**
-  - Exact addresses are hidden publicly and only an approximate area is shown
+  - Listers choose who sees the exact address (only people they share it with, signed-in members, or everyone); the street and an approximate area are always shown
   - Every listing has a report button
   - Rate limits on posting
   - Safety tips on the listing page and in the contact flow
@@ -67,7 +67,6 @@ The full scope, stack, data model, and roadmap are in `PROJECT_PLAN.md`. Durable
   - Rutgers campuses are called by their own names: College Ave, Busch, Livingston, Cook/Douglass
 
 **Open decisions:**
-- Whether the exact address is shown only to logged-in users or kept fully private until contact
 - Whether owner-controlled email/phone contact, shown to logged-in users only, is final for the MVP
 - How landlord listings are labeled or told apart from student sublets
 - A permanent product name ("RU Subletting" is the working name)

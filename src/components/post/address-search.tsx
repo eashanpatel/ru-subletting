@@ -44,7 +44,8 @@ async function search(q: string, signal: AbortSignal): Promise<Suggestion[]> {
     primary: f.properties.name,
     secondary: f.properties.place_formatted ?? "",
     full: f.properties.full_address ?? `${f.properties.name}, ${f.properties.place_formatted ?? ""}`,
-    street: f.properties.context?.street?.name ?? null,
+    // Street name is always shown publicly; fall back to the address line minus the house number.
+    street: f.properties.context?.street?.name ?? (f.properties.name.replace(/^[\d-]+[A-Za-z]?\s+/, "") || null),
     lat: f.properties.coordinates.latitude,
     lng: f.properties.coordinates.longitude,
   }));

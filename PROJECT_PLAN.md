@@ -76,7 +76,7 @@ Server components handle the first render of pages that need SEO and link previe
 
 ## Trust and safety (lightweight for MVP)
 With no `.edu` requirement and no email verification, the MVP relies on:
-- Hiding exact addresses publicly and showing an approximate map area. Exact addresses go to logged-in users (final rule still open, see below).
+- Listers choose who sees the exact address: only people they share it with (default), signed-in members, or everyone. The street name and an approximate area (~100 m) are always public.
 - A report button on every listing. Reports are saved to the database and reviewed manually for now.
 - Rate limits on listing creation
 - Safety tips on the listing page and in the contact flow
@@ -128,7 +128,7 @@ With no `.edu` requirement and no email verification, the MVP relies on:
 2. ~~Choose a design direction~~ Done: Stone + olive + brick, with a commute ruler, semester fit bar, and campus zones on the map. The browse page (`/`) is built as frontend only with demo data in `src/lib/demo-listings.ts`; the direction contract is in `.impeccable/surfaces/`. Still to do: `DESIGN.md` (run `/impeccable document`).
 3. ~~Write the Supabase schema~~ Applied to the hosted project (`supabase/migrations/`). Exact addresses live in `listing_locations` (signed-in only); listings carry a ~100 m rounded point. Contact info is private and shared via `get_listing_contact()`. Browse queries go through `search_listings()`.
 4. Real data: browse, Saved, and My listings read from Supabase via `search_listings()`; the map is Mapbox GL; saving writes to `favorites`. Dev demo listings: `supabase/dev/` (load and remove scripts). `/saved`, `/my-listings`, `/listings/new` redirect to sign-in when signed out. Light mode only for now.
-5. Listing page `/listings/[id]`: gallery, semester timeline, commute to every campus, amenities, description, location (approximate for everyone, exact address when signed in), owner, report form, and a contact card (sign-in required; shows only what the owner chose to share). Data via `get_listing()` / `get_listing_location()`.
+5. Listing page `/listings/[id]`: gallery, semester timeline, commute to every campus, amenities, description, location (street and approximate area for everyone; exact address per the lister's setting), owner, report form, and a contact card (sign-in required; shows only what the owner chose to share). Data via `get_listing()` / `get_listing_location()`.
 6. Post a sublet (`/listings/new`) and edit (`/listings/[id]/edit`): room type, building, beds/baths, dates (calendar + semester presets), rent, Mapbox address search, neighborhood, photo upload (browser-compressed, reorderable, cover first), amenities, description, contact methods (email, phone, WhatsApp, Instagram, Snapchat, other), live browse-card preview, save draft or publish. Saved through `save_listing()` in one transaction via a server action that also prunes removed photos and refreshes the listing cache. My listings: edit, view, pause/resume, mark taken/relist, delete.
 7. Auth wiring done: Supabase clients in `src/lib/supabase/`, session refresh in `src/proxy.ts`, `/sign-in` (Google + email/password), `/auth/callback`, `/auth/sign-out`.
 
@@ -140,6 +140,5 @@ With no `.edu` requirement and no email verification, the MVP relies on:
 
 ## Open questions
 1. **Contact method:** is "the owner chooses whether to show email and/or phone, to logged-in users only" final for the MVP?
-2. **Exact address visibility:** should the full address be public, or shown only to logged-in users, with an approximate area for everyone else?
 3. **Landlord listings:** how they're labeled or told apart from student sublets
 4. **Permanent product name**

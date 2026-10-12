@@ -244,6 +244,7 @@ export type Database = {
       }
       listings: {
         Row: {
+          address_visibility: Database["public"]["Enums"]["address_visibility"]
           baths: number | null
           beds: number | null
           created_at: string
@@ -265,6 +266,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address_visibility?: Database["public"]["Enums"]["address_visibility"]
           baths?: number | null
           beds?: number | null
           created_at?: string
@@ -286,6 +288,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address_visibility?: Database["public"]["Enums"]["address_visibility"]
           baths?: number | null
           beds?: number | null
           created_at?: string
@@ -505,6 +508,7 @@ export type Database = {
       get_listing: {
         Args: { p_listing_id: string }
         Returns: {
+          address_visibility: Database["public"]["Enums"]["address_visibility"]
           amenities: string[]
           baths: number
           beds: number
@@ -548,6 +552,7 @@ export type Database = {
       save_listing: {
         Args: {
           p_address: string
+          p_address_visibility?: Database["public"]["Enums"]["address_visibility"]
           p_amenities: string[]
           p_baths: number
           p_beds: number
@@ -617,6 +622,7 @@ export type Database = {
       }
     }
     Enums: {
+      address_visibility: "private" | "members" | "public"
       contact_kind:
         | "email"
         | "phone"
@@ -756,6 +762,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      address_visibility: ["private", "members", "public"],
       contact_kind: [
         "email",
         "phone",

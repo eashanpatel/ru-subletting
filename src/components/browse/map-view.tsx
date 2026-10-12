@@ -310,7 +310,7 @@ export function MapView({
       </div>
 
       <p className="absolute bottom-20 left-3 max-w-[60%] rounded-md bg-sheet/90 px-2 py-1 text-xs text-muted-foreground lg:bottom-8">
-        Pins show approximate locations. Sign in to see exact addresses.
+        Pins show approximate locations.
       </p>
     </div>
   );

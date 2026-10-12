@@ -48,6 +48,7 @@ function NewListingForm({ reference, userId, email }: { reference: ReferenceData
     dates: null,
     address: null,
     neighborhood: "",
+    addressVisibility: "private",
     description: "",
     amenities: [],
     photos: [],
@@ -69,6 +70,7 @@ type EditRow = {
   baths: number | null;
   neighborhood: string | null;
   street_name: string | null;
+  address_visibility: ListingFormValues["addressVisibility"];
   address: string | null;
   lat: number | null;
   lng: number | null;
@@ -132,6 +134,7 @@ export function EditListing({ id, reference }: { id: string; reference: Referenc
         ? { full: row.address, street: row.street_name, lat: row.lat, lng: row.lng }
         : null,
     neighborhood: row.neighborhood ?? "",
+    addressVisibility: row.address_visibility,
     description: row.description ?? "",
     amenities: row.amenities,
     photos: row.photos,

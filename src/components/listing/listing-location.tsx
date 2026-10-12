@@ -9,6 +9,7 @@ import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import type { Campus } from "@/lib/browse";
+import type { AddressVisibility } from "@/lib/listing-form";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const APPROX_RADIUS_M = 220;
@@ -28,21 +29,30 @@ function circle(lng: number, lat: number, radiusM: number, steps = 64): [number,
  */
 export function ListingLocation({
   listingId,
+  ownerId,
   lat,
   lng,
+  street,
   neighborhood,
+  visibility,
   campuses,
 }: {
   listingId: string;
+  ownerId: string;
   lat: number | null;
   lng: number | null;
+  street: string | null;
   neighborhood: string | null;
+  visibility: AddressVisibility;
   campuses: Campus[];
 }) {
   const { userId, ready } = useSession();
+  const isOwner = !!userId && userId === ownerId;
+  // Ask for the exact address only when this viewer could be allowed to see it.
+  const mayFetch = ready && (visibility === "public" || (visibility === "members" && !!userId) || isOwner);
   const exact = useQuery({
-    queryKey: ["listing-location", listingId, userId],
-    enabled: !!userId,
+    queryKey: ["listing-location", listingId, userId, visibility],
+    enabled: mayFetch,
     queryFn: async () => {
       const { data, error } = await createClient().rpc("get_listing_location", { p_listing_id: listingId });
       if (error) throw error;
@@ -144,21 +154,31 @@ export function ListingLocation({
         {exact.data ? (
           <p>
             <span className="font-medium">{exact.data.address}</span>
-            <span className="block text-muted-foreground">Exact address, shown because you&apos;re signed in.</span>
+            <span className="block text-muted-foreground">
+              {isOwner && visibility === "private"
+                ? "Only you see the exact address. Others see the street and the shaded area."
+                : isOwner && visibility === "members"
+                  ? "Signed-in members see the exact address. Others see the street and the shaded area."
+                  : visibility === "public"
+                    ? "Exact address."
+                    : "Exact address, shown because you're signed in."}
+            </span>
           </p>
         ) : (
           <p>
-            <span className="font-medium">{neighborhood ?? "New Brunswick area"}</span>
+            <span className="font-medium">{[street, neighborhood].filter(Boolean).join(", ") || "New Brunswick area"}</span>
             <span className="block text-muted-foreground">
               The shaded area shows roughly where it is.{" "}
-              {ready && !userId && (
+              {visibility === "private" ? (
+                "The person subletting shares the exact address directly when you reach out."
+              ) : visibility === "members" && ready && !userId ? (
                 <>
                   <Link href="/sign-in" className="font-medium text-brand underline-offset-4 hover:underline">
                     Sign in
                   </Link>{" "}
                   to see the exact address.
                 </>
-              )}
+              ) : null}
             </span>
           </p>
         )}

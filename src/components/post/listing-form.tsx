@@ -15,6 +15,7 @@ import {
   photoUrl,
 } from "@/lib/browse";
 import {
+  ADDRESS_VISIBILITY,
   type ListingFormValues,
   NEIGHBORHOODS,
   ROOM_TYPES,
@@ -273,8 +274,47 @@ export function ListingForm({
             />
           </Field>
           <p id="address-help" className="mt-2 text-sm text-muted-foreground">
-            Only signed-in people see the exact address. Everyone else sees an area about two blocks wide.
+            {v.address?.street
+              ? `The street (${v.address.street}) and an area about two blocks wide are always shown. You choose who sees the exact address.`
+              : "The street name and an area about two blocks wide are always shown. You choose who sees the exact address."}
           </p>
+
+          <fieldset className="mt-5">
+            <legend className="mb-2 text-sm font-medium">Who can see the exact address?</legend>
+            <Controller
+              control={control}
+              name="addressVisibility"
+              render={({ field }) => (
+                <div className="flex flex-col gap-2">
+                  {ADDRESS_VISIBILITY.map((o) => {
+                    const on = field.value === o.value;
+                    return (
+                      <label
+                        key={o.value}
+                        className={cn(
+                          "flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors",
+                          on ? "border-brand bg-brand-soft" : "border-input bg-sheet hover:border-foreground/40",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="addressVisibility"
+                          value={o.value}
+                          checked={on}
+                          onChange={() => field.onChange(o.value)}
+                          className="mt-0.5 size-4 shrink-0 accent-[var(--brand)]"
+                        />
+                        <span>
+                          <span className={cn("block text-sm font-medium", on && "text-accent-foreground")}>{o.label}</span>
+                          <span className="block text-sm text-muted-foreground">{o.hint}</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            />
+          </fieldset>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <Field label="Neighborhood" htmlFor="neighborhood-select" error={errors.neighborhood?.message}>

@@ -71,6 +71,7 @@ export async function saveListing(values: ListingFormValues): Promise<Result> {
     p_amenities: v.amenities,
     p_photos: v.photos,
     p_contacts: v.contacts.filter((c) => c.value),
+    p_address_visibility: v.addressVisibility,
   });
 
   if (error) {

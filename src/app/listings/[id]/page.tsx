@@ -135,9 +135,12 @@ async function ListingContent({ params }: { params: Params }) {
           <Section title="Location">
             <ListingLocation
               listingId={listing.id}
+              ownerId={listing.ownerId}
               lat={listing.lat}
               lng={listing.lng}
+              street={listing.street}
               neighborhood={listing.neighborhood}
+              visibility={listing.addressVisibility}
               campuses={reference.campuses}
             />
           </Section>

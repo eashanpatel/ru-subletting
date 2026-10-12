@@ -3,6 +3,25 @@ import type { Database } from "@/lib/supabase/database.types";
 import { ROOM_TYPE_LABEL, type RoomType } from "@/lib/browse";
 
 export type ContactKind = Database["public"]["Enums"]["contact_kind"];
+export type AddressVisibility = Database["public"]["Enums"]["address_visibility"];
+
+export const ADDRESS_VISIBILITY: { value: AddressVisibility; label: string; hint: string }[] = [
+  {
+    value: "private",
+    label: "Only people I share it with",
+    hint: "Everyone sees the street and the area on the map. You give the exact address to people you talk to.",
+  },
+  {
+    value: "members",
+    label: "Signed-in members",
+    hint: "Anyone with an account sees the exact address and a pin. People who aren't signed in see the street and area.",
+  },
+  {
+    value: "public",
+    label: "Everyone",
+    hint: "The exact address is shown to anyone. Best for landlords and buildings.",
+  },
+];
 export type HomeType = "apartment" | "house";
 
 export const ROOM_TYPES: { value: RoomType; label: string; hint: string }[] = [
@@ -131,6 +150,7 @@ export const listingSchema = z
       })
       .nullable(),
     neighborhood: z.string().trim().max(60),
+    addressVisibility: z.enum(["private", "members", "public"]),
     description: z.string().trim().max(2000, "Keep it under 2,000 characters."),
     amenities: z.array(z.string()),
     photos: z.array(z.string()).max(MAX_PHOTOS),
@@ -145,6 +165,8 @@ export const listingSchema = z
     });
     if (v.intent !== "publish") return;
     if (!v.address) ctx.addIssue({ code: "custom", path: ["address"], message: "Pick the address from the suggestions." });
+    else if (!v.address.street)
+      ctx.addIssue({ code: "custom", path: ["address"], message: "Pick an address that includes a street name." });
     if (!v.neighborhood) ctx.addIssue({ code: "custom", path: ["neighborhood"], message: "Choose a neighborhood." });
     if (v.roomType !== "studio" && !v.bedrooms)
       ctx.addIssue({ code: "custom", path: ["bedrooms"], message: "How many bedrooms does the place have?" });

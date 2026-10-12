@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
 import { type ListingStatus, type RoomType, estimateCommute, photoUrl, type Commute } from "@/lib/browse";
+import type { AddressVisibility } from "@/lib/listing-form";
 
 export type CampusCommute = { slug: string; name: string; distanceM: number; commute: Commute };
 
@@ -27,6 +28,7 @@ export type ListingDetail = {
   photos: string[];
   amenities: string[];
   campuses: CampusCommute[];
+  addressVisibility: AddressVisibility;
 };
 
 /**
@@ -76,5 +78,6 @@ export async function getListing(id: string): Promise<ListingDetail | null> {
       distanceM: d.distance_m,
       commute: estimateCommute(d.distance_m)!,
     })),
+    addressVisibility: row.address_visibility,
   };
 }
