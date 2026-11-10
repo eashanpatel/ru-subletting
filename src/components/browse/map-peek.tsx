@@ -22,7 +22,7 @@ export function MapPeek({
     <div
       role="dialog"
       aria-label={title}
-      className="absolute inset-x-3 bottom-20 z-20 flex overflow-hidden rounded-lg border border-rule bg-sheet shadow-[0_10px_30px_-12px_oklch(0.2_0.02_60/0.45)]"
+      className="absolute inset-x-3 bottom-20 z-20 flex overflow-hidden rounded-xl border border-rule bg-sheet shadow-[0_10px_30px_-12px_oklch(0.15_0.04_265/0.55)]"
     >
       <Link href={href} className="relative w-28 shrink-0 bg-muted">
         {listing.photoUrl && <Image src={listing.photoUrl} alt="" fill sizes="112px" className="object-cover" />}

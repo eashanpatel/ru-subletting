@@ -129,7 +129,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
       </a>
 
       {/* Filter bar */}
-      <div className="sticky top-16 z-20 border-b border-rule bg-background/95 backdrop-blur-sm">
+      <div className="sticky top-16 z-20 border-b border-rule bg-background">
         <div className="mx-auto flex max-w-[1600px] items-center gap-2 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] md:px-7">
           <FilterSelect
             label="Campus"
@@ -152,10 +152,10 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
             type="button"
             onClick={() => moreRef.current?.showModal()}
             className={cn(
-              "inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors",
+              "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border bg-sheet px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
               amenities.length
-                ? "border-brand bg-brand-soft text-accent-foreground"
-                : "border-input bg-sheet hover:border-foreground/40",
+                ? "border-foreground shadow-[inset_0_0_0_1px_var(--foreground)]"
+                : "border-rule hover:border-foreground/50",
             )}
           >
             <SlidersHorizontal className="size-4" aria-hidden />
@@ -166,7 +166,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
             <button
               type="button"
               onClick={clearFilters}
-              className="h-10 shrink-0 rounded-lg px-3 text-sm font-medium text-brand hover:bg-brand-soft"
+              className="h-10 shrink-0 rounded-full px-3 text-sm font-semibold text-brand underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               Clear all
             </button>
@@ -182,12 +182,12 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
         >
           <div className="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
             <div aria-live="polite">
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <h1 className="text-2xl font-bold tracking-tight">
                 {loadingFirst ? (
                   "Finding places"
                 ) : (
                   <>
-                    <span className="font-mono">{activeCount}</span> {activeCount === 1 ? "place" : "places"}
+                    {activeCount} {activeCount === 1 ? "place" : "places"}
                     {campusName ? ` near ${campusName}` : " near campus"}
                   </>
                 )}
@@ -202,7 +202,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as Sort)}
-                className="h-9 rounded-lg border border-input bg-sheet px-2 font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                className="h-9 rounded-full border border-rule bg-sheet px-3 font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
               >
                 <option value="closest">{campusName ? `Closest to ${campusName}` : "Closest to a campus"}</option>
                 <option value="newest">Newest</option>
@@ -225,7 +225,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
               </button>
             </div>
           ) : loadingFirst ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               {Array.from({ length: 4 }, (_, i) => (
                 <ListingCardSkeleton key={i} />
               ))}
@@ -233,7 +233,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
           ) : results.length === 0 ? (
             <EmptyState onClear={clearFilters} filtersSet={filtersSet} />
           ) : (
-            <div className={cn("grid gap-4 transition-opacity sm:grid-cols-2", search.isFetching && "opacity-70")}>
+            <div className={cn("grid gap-5 transition-opacity sm:grid-cols-2", search.isFetching && "opacity-70")}>
               {results.map((l) => (
                 <ListingCard
                   key={l.id}
@@ -285,7 +285,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
       <button
         type="button"
         onClick={() => setMobileView((v) => (v === "list" ? "map" : "list"))}
-        className="fixed bottom-5 left-1/2 z-30 inline-flex h-12 -translate-x-1/2 items-center gap-2 rounded-lg bg-foreground px-5 text-sm font-semibold text-background shadow-[0_8px_24px_-8px_oklch(0.2_0.02_250/0.5)] active:scale-[0.98] lg:hidden"
+        className="fixed bottom-5 left-1/2 z-30 inline-flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-plate px-6 text-sm font-semibold text-plate-foreground shadow-[0_8px_24px_-8px_oklch(0.15_0.04_265/0.6)] active:scale-[0.98] lg:hidden"
       >
         {mobileView === "list" ? <MapIcon className="size-4" aria-hidden /> : <List className="size-4" aria-hidden />}
         {mobileView === "list" ? "Map" : "List"}

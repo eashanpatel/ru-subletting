@@ -15,8 +15,8 @@ function overlap(start: string, end: string, refStart: string, refEnd: string) {
 
 /**
  * A listing's dates drawn against a reference span. With the visitor's dates
- * chosen, the reference is their dates: the covered part fills olive and
- * brick ticks mark their start and end. Otherwise the listing is drawn
+ * chosen, the reference is their dates: the covered part fills door blue and
+ * red ticks mark their start and end. Otherwise the listing is drawn
  * against the semester it overlaps most.
  */
 export function SemesterFitBar({

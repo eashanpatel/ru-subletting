@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/site-footer";
+import { THEME_INIT_SCRIPT } from "@/components/theme-toggle";
 
-const geist = Geist({
+const hanken = Hanken_Grotesk({
   variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -24,8 +20,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${hanken.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Sets the theme class before first paint, so dark mode never flashes light. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <Providers>
           {children}

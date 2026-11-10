@@ -22,13 +22,13 @@ export async function HeaderAccount() {
     <div className="hidden items-center gap-1 md:flex">
       <Link
         href="/account"
-        className="max-w-44 truncate rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="max-w-44 truncate rounded-lg px-3 py-2 text-sm font-semibold text-shell-muted hover:bg-shell-foreground/10 hover:text-shell-foreground focus-visible:ring-2 focus-visible:ring-shell-foreground focus-visible:outline-none"
         title={label}
       >
         {label}
       </Link>
       <form action="/auth/sign-out" method="post">
-        <button type="submit" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted">
+        <button type="submit" className="rounded-lg px-3 py-2 text-sm font-semibold text-shell-muted hover:bg-shell-foreground/10 hover:text-shell-foreground focus-visible:ring-2 focus-visible:ring-shell-foreground focus-visible:outline-none">
           Sign out
         </button>
       </form>
@@ -38,7 +38,7 @@ export async function HeaderAccount() {
 
 export function SignInLink() {
   return (
-    <Link href="/sign-in" className="hidden rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted md:inline-flex">
+    <Link href="/sign-in" className="hidden rounded-lg px-3 py-2 text-sm font-semibold hover:bg-shell-foreground/10 focus-visible:ring-2 focus-visible:ring-shell-foreground focus-visible:outline-none md:inline-flex">
       Sign in
     </Link>
   );

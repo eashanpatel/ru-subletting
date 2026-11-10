@@ -27,7 +27,7 @@ export function MobileMenu({ current }: { current: string }) {
       <button
         type="button"
         onClick={() => ref.current?.showModal()}
-        className="-mr-2 inline-flex size-10 items-center justify-center rounded-lg hover:bg-muted md:hidden"
+        className="-mr-2 inline-flex size-10 items-center justify-center rounded-lg hover:bg-shell-foreground/10 focus-visible:ring-2 focus-visible:ring-shell-foreground focus-visible:outline-none md:hidden"
         aria-label="Open menu"
         aria-haspopup="dialog"
       >
@@ -40,8 +40,9 @@ export function MobileMenu({ current }: { current: string }) {
         className="m-0 ml-auto h-dvh max-h-none w-[min(20rem,85vw)] max-w-none border-l border-rule bg-sheet p-0 text-foreground backdrop:bg-foreground/30"
       >
         <div className="flex h-16 items-center justify-between border-b border-rule px-4">
-          <span className="text-lg font-semibold tracking-tight">
-            <span className="font-mono text-brand">RU</span> Subletting
+          <span className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+            <span className="rounded-md bg-cta px-1.5 py-0.5 text-cta-foreground">RU</span>
+            Subletting
           </span>
           <button
             type="button"

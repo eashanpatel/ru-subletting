@@ -6,6 +6,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Minus, Plus, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type BrowseListing, type Campus, formatPrice } from "@/lib/browse";
+import { mapTheme, onThemeChange } from "@/lib/map-theme";
 
 export type Bounds = { west: number; south: number; east: number; north: number };
 
@@ -14,14 +15,15 @@ type Pin = { key: string; items: BrowseListing[]; lng: number; lat: number; el: 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const CAMPUS_RADIUS_M = 650;
 
+// Pins are the card's price plate at map scale: navy by default, red when saved, blue when active.
 const PIN_BASE =
-  "rounded-md border px-2 py-1 font-mono text-sm font-semibold leading-none shadow-sm transition-[background-color,color,transform] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
-const PIN_DEFAULT = "border-foreground/15 bg-sheet text-foreground hover:border-brand";
-const PIN_SAVED = "border-brand bg-brand-soft text-accent-foreground";
-const PIN_ACTIVE = "z-10 scale-110 border-brand bg-brand text-brand-foreground";
-const PIN_TAKEN = "border-rule bg-muted text-muted-foreground line-through";
+  "rounded-lg border-2 px-2 py-1 font-mono text-sm font-extrabold leading-none shadow-[0_2px_6px_-1px_oklch(0.15_0.04_265/0.45)] transition-[background-color,color,transform] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]";
+const PIN_DEFAULT = "border-plate bg-plate text-plate-foreground hover:scale-105";
+const PIN_SAVED = "border-cta bg-cta text-cta-foreground hover:scale-105";
+const PIN_ACTIVE = "z-10 scale-110 border-sheet bg-brand text-brand-foreground";
+const PIN_TAKEN = "border-muted bg-muted text-muted-foreground line-through";
 const CLUSTER_BASE =
-  "flex size-14 flex-col items-center justify-center rounded-full border-2 border-brand leading-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
+  "flex size-14 flex-col items-center justify-center rounded-full border-2 border-plate leading-none shadow-[0_2px_6px_-1px_oklch(0.15_0.04_265/0.45)] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]";
 
 /** A circle polygon around a point, for campus zones. */
 function circle(lng: number, lat: number, radiusM: number, steps = 64): [number, number][] {
@@ -91,7 +93,7 @@ export function MapView({
           : [-74.4474, 40.5008];
         map = new mapboxgl.Map({
           container,
-          style: "mapbox://styles/mapbox/light-v11",
+          style: mapTheme().style,
           center,
           zoom: 12.4,
           attributionControl: false,
@@ -99,7 +101,9 @@ export function MapView({
         map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
         mapRef.current = map;
 
-        map.on("load", () => {
+        // Runs on first load and again after every theme switch, which replaces the style.
+        map.on("style.load", () => {
+          const theme = mapTheme();
           map!.addSource("campuses", {
             type: "geojson",
             data: {
@@ -115,13 +119,13 @@ export function MapView({
             id: "campus-fill",
             type: "fill",
             source: "campuses",
-            paint: { "fill-color": "#6b7a3a", "fill-opacity": 0.07 },
+            paint: { "fill-color": theme.zone, "fill-opacity": 0.07 },
           });
           map!.addLayer({
             id: "campus-outline",
             type: "line",
             source: "campuses",
-            paint: { "line-color": "#6b7a3a", "line-opacity": 0.45, "line-width": 1.25, "line-dasharray": [2, 2] },
+            paint: { "line-color": theme.zone, "line-opacity": 0.45, "line-width": 1.25, "line-dasharray": [2, 2] },
           });
           map!.addLayer({
             id: "campus-label",
@@ -133,7 +137,7 @@ export function MapView({
               "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
               "text-offset": [0, -3.6],
             },
-            paint: { "text-color": "#4a5428", "text-halo-color": "#ffffff", "text-halo-width": 1.5 },
+            paint: { "text-color": theme.zoneText, "text-halo-color": theme.halo, "text-halo-width": 1.5 },
           });
           setReady(true);
         });
@@ -151,10 +155,12 @@ export function MapView({
       else start();
     });
     observer.observe(container);
+    const stopThemeWatch = onThemeChange(() => mapRef.current?.setStyle(mapTheme().style));
 
     return () => {
       cancelled = true;
       observer.disconnect();
+      stopThemeWatch();
       pinsRef.current.forEach((p) => p.marker.remove());
       pinsRef.current = [];
       map?.remove();
@@ -195,7 +201,7 @@ export function MapView({
           const pool = open.length ? open : g.items;
           const from = Math.min(...pool.map((l) => l.price));
           el.setAttribute("aria-label", `${pool.length} places here, from ${formatPrice(from)} per month. Zoom in`);
-          el.innerHTML = `<span class="font-mono text-base font-semibold">${pool.length}</span><span class="mt-0.5 font-mono text-[10px] opacity-70">${formatPrice(from)}+</span>`;
+          el.innerHTML = `<span class="font-mono text-base font-extrabold">${pool.length}</span><span class="mt-0.5 font-mono text-[10px] opacity-70">${formatPrice(from)}+</span>`;
           el.addEventListener("click", () => {
             const lngs = g.items.map((l) => l.lng!);
             const lats = g.items.map((l) => l.lat!);
@@ -237,7 +243,7 @@ export function MapView({
     for (const p of pinsRef.current) {
       if (p.items.length > 1) {
         const on = p.items.some((l) => l.id === active);
-        p.el.className = cn(CLUSTER_BASE, on ? "bg-brand text-brand-foreground" : "bg-sheet text-foreground hover:bg-brand-soft");
+        p.el.className = cn(CLUSTER_BASE, on ? "bg-plate text-plate-foreground" : "bg-sheet text-foreground hover:bg-muted");
       } else {
         const l = p.items[0];
         p.el.className = cn(
@@ -272,7 +278,7 @@ export function MapView({
           <button
             type="button"
             onClick={searchHere}
-            className="inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-lg border border-rule bg-sheet px-3 text-sm font-medium shadow-sm transition-colors hover:border-foreground/40 active:scale-[0.98]"
+            className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border border-rule bg-sheet px-4 text-sm font-semibold shadow-[0_4px_12px_-4px_oklch(0.15_0.04_265/0.45)] transition-colors hover:border-foreground/50 active:scale-[0.98]"
           >
             <Search className="size-4" aria-hidden />
             Search this area
@@ -282,7 +288,7 @@ export function MapView({
           <button
             type="button"
             onClick={onClearArea}
-            className="inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-lg border border-brand bg-brand-soft px-3 text-sm font-medium text-accent-foreground shadow-sm active:scale-[0.98]"
+            className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border border-plate bg-plate px-4 text-sm font-semibold text-plate-foreground shadow-[0_4px_12px_-4px_oklch(0.15_0.04_265/0.45)] active:scale-[0.98]"
           >
             Showing this area only
             <X className="size-4" aria-label="Show all areas" />

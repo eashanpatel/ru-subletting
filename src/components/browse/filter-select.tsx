@@ -6,7 +6,7 @@ type Option = { value: string; label: string };
 
 /**
  * A filter chip backed by a native <select>, so it works with keyboards and
- * opens the OS picker on phones. Tints olive when a value is set.
+ * opens the OS picker on phones. Outlines in ink when a value is set.
  */
 export function FilterSelect({
   label,
@@ -32,7 +32,7 @@ export function FilterSelect({
       )}
     >
       <span className={active ? "" : "text-muted-foreground"}>{label}</span>
-      <span className="font-medium">{current}</span>
+      <span className="font-semibold">{current}</span>
       <ChevronDown className="size-4 opacity-60" aria-hidden />
       <select
         value={value}

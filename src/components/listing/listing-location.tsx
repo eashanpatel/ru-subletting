@@ -9,6 +9,7 @@ import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import type { Campus } from "@/lib/browse";
+import { mapTheme } from "@/lib/map-theme";
 import type { AddressVisibility } from "@/lib/listing-form";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -73,9 +74,10 @@ export function ListingLocation({
     import("mapbox-gl").then(({ default: mapboxgl }) => {
       if (cancelled) return;
       mapboxgl.accessToken = TOKEN;
+      const theme = mapTheme();
       map = new mapboxgl.Map({
         container,
-        style: "mapbox://styles/mapbox/light-v11",
+        style: theme.style,
         center: [lng, lat],
         zoom: 14.2,
         attributionControl: false,
@@ -97,26 +99,26 @@ export function ListingLocation({
             })),
           },
         });
-        map!.addLayer({ id: "campus-fill", type: "fill", source: "campuses", paint: { "fill-color": "#6b7a3a", "fill-opacity": 0.06 } });
+        map!.addLayer({ id: "campus-fill", type: "fill", source: "campuses", paint: { "fill-color": theme.zone, "fill-opacity": 0.06 } });
         map!.addLayer({
           id: "campus-outline",
           type: "line",
           source: "campuses",
-          paint: { "line-color": "#6b7a3a", "line-opacity": 0.4, "line-width": 1.25, "line-dasharray": [2, 2] },
+          paint: { "line-color": theme.zone, "line-opacity": 0.4, "line-width": 1.25, "line-dasharray": [2, 2] },
         });
         map!.addLayer({
           id: "campus-label",
           type: "symbol",
           source: "campuses",
           layout: { "text-field": ["get", "name"], "text-size": 12, "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"], "text-offset": [0, -3.6] },
-          paint: { "text-color": "#4a5428", "text-halo-color": "#ffffff", "text-halo-width": 1.5 },
+          paint: { "text-color": theme.zoneText, "text-halo-color": theme.halo, "text-halo-width": 1.5 },
         });
         map!.addSource("approx", {
           type: "geojson",
           data: { type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [circle(lng, lat, APPROX_RADIUS_M)] } },
         });
-        map!.addLayer({ id: "approx-fill", type: "fill", source: "approx", paint: { "fill-color": "#6b7a3a", "fill-opacity": 0.18 } });
-        map!.addLayer({ id: "approx-line", type: "line", source: "approx", paint: { "line-color": "#5c6a2e", "line-width": 1.5 } });
+        map!.addLayer({ id: "approx-fill", type: "fill", source: "approx", paint: { "fill-color": theme.zone, "fill-opacity": 0.18 } });
+        map!.addLayer({ id: "approx-line", type: "line", source: "approx", paint: { "line-color": theme.zone, "line-width": 1.5 } });
       });
     });
 
@@ -139,7 +141,7 @@ export function ListingLocation({
     import("mapbox-gl").then(({ default: mapboxgl }) => {
       if (cancelled) return;
       pinRef.current?.remove();
-      pinRef.current = new mapboxgl.Marker({ color: "#5c6a2e" }).setLngLat([point.lng, point.lat]).addTo(map);
+      pinRef.current = new mapboxgl.Marker({ color: mapTheme().pin }).setLngLat([point.lng, point.lat]).addTo(map);
       map.easeTo({ center: [point.lng, point.lat], zoom: 15.2, duration: 400 });
     });
     return () => {
