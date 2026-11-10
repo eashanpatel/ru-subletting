@@ -117,7 +117,7 @@ With no `.edu` requirement and no email verification, the MVP relies on:
 - Not wired yet:
   - The TanStack Query provider isn't in the layout
   - Sentry and PostHog aren't configured
-- `npm audit` reports 5 high-severity vulnerabilities that came with the base install. Review them before launch, and don't run `npm audit fix --force` blindly.
+- Security: Next.js is on 16.4.6 (patched) and non-breaking `npm audit fix` updates are applied, so no critical or high findings remain. 12 low/moderate findings are left, all in developer tooling (the shadcn CLI and lint packages), not in what ships to the browser; their only offered fix downgrades shadcn, so don't run `npm audit fix --force`.
 - Design skills are in `.claude/skills/`:
   - **`impeccable`** is the main skill, for app UI: browse, map, filters, the listing form, and the profile
   - **`design-taste-frontend`** is for the homepage/landing page
