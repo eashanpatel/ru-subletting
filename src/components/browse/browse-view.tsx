@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { List, Map as MapIcon, SlidersHorizontal, X } from "lucide-react";
+import { ChevronDown, List, Map as MapIcon, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -23,6 +23,7 @@ import { DateRangeFilter } from "./date-range-filter";
 import { FilterSelect } from "./filter-select";
 import { PriceFilter } from "./price-filter";
 import { ListingCard, ListingCardSkeleton } from "./listing-card";
+import { BubbleSelect } from "@/components/ui/bubble-select";
 import { MapView } from "./map-view";
 import { MapPeek } from "./map-peek";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -93,6 +94,12 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
     !!bounds;
   const campusName = campuses.find((c) => c.slug === campus)?.name;
   const loadingFirst = search.isPending;
+  const sortOptions = [
+    { value: "closest", label: campusName ? `Closest to ${campusName}` : "Closest to a campus" },
+    { value: "newest", label: "Newest" },
+    { value: "price_asc", label: "Price, low to high" },
+    { value: "price_desc", label: "Price, high to low" },
+  ];
 
   function clearFilters() {
     clear();
@@ -131,6 +138,8 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
       {/* Filter bar */}
       <div className="sticky top-16 z-20 border-b border-rule bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-[1600px] items-center gap-2 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] md:px-7">
+          {/* On wide screens Campus, When, and Price live in the header search pill. */}
+          <div className="contents xl:hidden">
           <FilterSelect
             label="Campus"
             value={campus}
@@ -139,6 +148,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
           />
           <DateRangeFilter value={dates} semesters={semesters} onChange={setDates} />
           <PriceFilter value={price} onChange={setPrice} />
+          </div>
           <FilterSelect
             label="Room"
             value={roomType}
@@ -152,7 +162,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
             type="button"
             onClick={() => moreRef.current?.showModal()}
             className={cn(
-              "inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border px-3 text-sm font-medium transition-colors",
+              "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
               amenities.length
                 ? "border-brand bg-brand-soft text-accent-foreground"
                 : "border-input bg-sheet hover:border-foreground/40",
@@ -166,7 +176,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
             <button
               type="button"
               onClick={clearFilters}
-              className="h-10 shrink-0 rounded-lg px-3 text-sm font-medium text-brand hover:bg-brand-soft"
+              className="h-10 shrink-0 rounded-full px-4 text-sm font-medium text-brand hover:bg-brand-soft"
             >
               Clear all
             </button>
@@ -177,8 +187,9 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
       <main className="mx-auto grid w-full max-w-[1600px] flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(400px,42%)]">
         {/* Results */}
         <section
+          id="results"
           aria-label="Listings"
-          className={cn("min-w-0 px-4 pb-24 pt-5 md:px-7 lg:pb-10", mobileView === "map" && "hidden lg:block")}
+          className={cn("min-w-0 scroll-mt-32 px-4 pb-24 pt-5 md:px-7 lg:pb-10", mobileView === "map" && "hidden lg:block")}
         >
           <div className="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
             <div aria-live="polite">
@@ -197,19 +208,17 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
                 {bounds && ", in the map area"}
               </p>
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Sort by</span>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as Sort)}
-                className="h-9 rounded-lg border border-input bg-sheet px-2 font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                <option value="closest">{campusName ? `Closest to ${campusName}` : "Closest to a campus"}</option>
-                <option value="newest">Newest</option>
-                <option value="price_asc">Price, low to high</option>
-                <option value="price_desc">Price, high to low</option>
-              </select>
-            </label>
+            <BubbleSelect
+              label="Sort by"
+              value={sort}
+              onChange={(v) => setSort(v as Sort)}
+              options={sortOptions}
+              className="group inline-flex h-9 items-center gap-1.5 rounded-full border border-input bg-sheet px-3.5 text-sm transition-colors hover:border-foreground/40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none data-[popup-open]:border-foreground/50"
+            >
+              <span className="text-muted-foreground">Sort</span>
+              <span className="font-semibold">{sortOptions.find((o) => o.value === sort)?.label}</span>
+              <ChevronDown className="size-4 opacity-60 transition-transform group-data-[popup-open]:rotate-180" aria-hidden />
+            </BubbleSelect>
           </div>
 
           {search.isError ? (

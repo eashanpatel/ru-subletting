@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bookmark } from "lucide-react";
+import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   type BrowseListing,
@@ -71,6 +71,20 @@ export function ListingCard({
             className="object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none"
           />
         )}
+        {!inactive && onToggleSave && (
+          <button
+            type="button"
+            onClick={onToggleSave}
+            aria-pressed={saved}
+            aria-label={saved ? "Remove from saved" : "Save listing"}
+            className={cn(
+              "absolute right-2.5 top-2.5 z-10 inline-flex size-10 items-center justify-center rounded-full shadow-[0_2px_8px_-2px_oklch(0.25_0.02_60/0.5)] transition-[background-color,color,transform] active:scale-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
+              saved ? "bg-brand text-brand-foreground" : "bg-sheet/95 text-foreground hover:text-brand",
+            )}
+          >
+            <Heart className={cn("size-[18px]", saved && "fill-current")} strokeWidth={2.25} aria-hidden />
+          </button>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
@@ -116,30 +130,13 @@ export function ListingCard({
           </div>
         )}
 
-        <div className="mt-auto flex items-end justify-between border-t border-rule pt-3">
+        <div className="mt-auto border-t border-rule pt-3">
           <p className="font-mono text-2xl font-semibold tracking-tight">
             <span className={cn(listing.status === "taken" && "text-muted-foreground line-through decoration-1")}>
               {formatPrice(listing.price)}
             </span>
             <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground"> /mo</span>
           </p>
-
-          {!inactive && onToggleSave && (
-            <button
-              type="button"
-              onClick={onToggleSave}
-              aria-pressed={saved}
-              aria-label={saved ? "Remove from saved" : "Save listing"}
-              className={cn(
-                "relative z-10 inline-flex size-11 items-center justify-center rounded-lg border transition-colors active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                saved
-                  ? "border-brand bg-brand text-brand-foreground"
-                  : "border-rule text-muted-foreground hover:border-foreground/40 hover:text-foreground",
-              )}
-            >
-              <Bookmark className={cn("size-4", saved && "fill-current")} aria-hidden />
-            </button>
-          )}
         </div>
       </div>
     </article>

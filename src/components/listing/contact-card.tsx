@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { AtSign, Bookmark, Ghost, Link2, Loader2, Mail, MessageCircle, MessageSquare, ShieldCheck } from "lucide-react";
+import { AtSign, Heart, Ghost, Link2, Loader2, Mail, MessageCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -60,7 +60,7 @@ export function ContactCard(props: Props) {
               saved ? "border-brand bg-brand text-brand-foreground" : "border-input hover:border-foreground/40",
             )}
           >
-            <Bookmark className={cn("size-4", saved && "fill-current")} aria-hidden />
+            <Heart className={cn("size-4", saved && "fill-current")} aria-hidden />
             {saved ? "Saved" : "Save"}
           </button>
         )}

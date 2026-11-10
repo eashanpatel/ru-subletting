@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { PRICE_SLIDER_MAX, PRICE_STEP, type PriceRange, formatPrice } from "@/lib/browse";
 import { chipClass } from "./filter-chip";
 
-function summary(v: PriceRange) {
+export function summary(v: PriceRange) {
   if (v.min != null && v.max != null) return `${formatPrice(v.min)} to ${formatPrice(v.max)}`;
   if (v.min != null) return `${formatPrice(v.min)}+`;
   if (v.max != null) return `Up to ${formatPrice(v.max)}`;
@@ -25,10 +25,10 @@ export function PriceFilter({ value, onChange }: { value: PriceRange; onChange: 
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className={chipClass(active)}>
         <span className={active ? "" : "text-muted-foreground"}>Price</span>
-        <span className="font-medium">{summary(value)}</span>
-        <ChevronDown className="size-4 opacity-60" aria-hidden />
+        <span className="font-semibold">{summary(value)}</span>
+        <ChevronDown className="size-4 opacity-60 transition-transform group-data-[popup-open]:rotate-180" aria-hidden />
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] gap-0 p-0">
+      <PopoverContent align="start" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] gap-0 rounded-2xl p-0 shadow-[0_16px_40px_-18px_oklch(0.25_0.02_60/0.45)]">
         {open && (
           <PricePanel
             initial={value}
@@ -47,7 +47,7 @@ export function PriceFilter({ value, onChange }: { value: PriceRange; onChange: 
  * Slider and boxes stay in sync. The slider tops out at PRICE_SLIDER_MAX,
  * where it means "no max"; the boxes accept any amount.
  */
-function PricePanel({ initial, onApply }: { initial: PriceRange; onApply: (value: PriceRange) => void }) {
+export function PricePanel({ initial, onApply }: { initial: PriceRange; onApply: (value: PriceRange) => void }) {
   const [minText, setMinText] = useState(initial.min != null ? String(initial.min) : "");
   const [maxText, setMaxText] = useState(initial.max != null ? String(initial.max) : "");
 
@@ -67,7 +67,7 @@ function PricePanel({ initial, onApply }: { initial: PriceRange; onApply: (value
   }
 
   const inputClass =
-    "h-11 w-full rounded-lg border border-input bg-sheet pl-6 pr-3 font-mono text-base outline-none placeholder:font-sans placeholder:text-muted-foreground/80 focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-ring/30 aria-[invalid=true]:border-destructive";
+    "h-11 w-full rounded-xl border border-input bg-sheet pl-6 pr-3 font-mono text-base outline-none placeholder:font-sans placeholder:text-muted-foreground/80 focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-ring/30 aria-[invalid=true]:border-destructive";
 
   return (
     <div className="flex flex-col">
@@ -138,7 +138,7 @@ function PricePanel({ initial, onApply }: { initial: PriceRange; onApply: (value
         <button
           type="button"
           onClick={() => onApply({ min: null, max: null })}
-          className="h-10 rounded-lg px-3 text-sm font-medium hover:bg-muted"
+          className="h-10 rounded-full px-4 text-sm font-medium hover:bg-muted"
         >
           Clear
         </button>
@@ -146,7 +146,7 @@ function PricePanel({ initial, onApply }: { initial: PriceRange; onApply: (value
           type="button"
           disabled={invalid}
           onClick={() => onApply({ min: min > 0 ? min : null, max })}
-          className="h-10 rounded-lg bg-brand px-4 text-sm font-semibold text-brand-foreground active:scale-[0.98] disabled:opacity-50"
+          className="h-10 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground active:scale-[0.98] disabled:opacity-50"
         >
           Apply
         </button>

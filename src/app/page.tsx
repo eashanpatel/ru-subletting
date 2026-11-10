@@ -1,13 +1,20 @@
 import { Suspense } from "react";
 import { BrowseView } from "@/components/browse/browse-view";
 import { SiteHeader } from "@/components/browse/site-header";
+import { HeaderSearch } from "@/components/browse/header-search";
 import { getReferenceData } from "@/lib/reference-data";
 
 export default async function BrowsePage() {
   const reference = await getReferenceData();
   return (
     <>
-      <SiteHeader />
+      <SiteHeader
+        search={
+          <Suspense fallback={<div className="h-[52px] w-full max-w-[460px] rounded-full border border-input bg-sheet" />}>
+            <HeaderSearch reference={reference} className="h-[52px] w-full max-w-[460px]" />
+          </Suspense>
+        }
+      />
       {/* Filters come from the URL, which is request data. */}
       <Suspense fallback={<BrowseFallback />}>
         <BrowseView reference={reference} />

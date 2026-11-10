@@ -31,10 +31,10 @@ export function DateRangeFilter({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className={chipClass(!!value)}>
         <span className={value ? "" : "text-muted-foreground"}>{label}</span>
-        <span className="font-medium">{value ? formatDateRange(value.start, value.end) : "Any dates"}</span>
-        <ChevronDown className="size-4 opacity-60" aria-hidden />
+        <span className="font-semibold">{value ? formatDateRange(value.start, value.end) : "Any dates"}</span>
+        <ChevronDown className="size-4 opacity-60 transition-transform group-data-[popup-open]:rotate-180" aria-hidden />
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={8} className="w-auto max-w-[calc(100vw-2rem)] gap-0 p-0">
+      <PopoverContent align="start" sideOffset={8} className="w-auto max-w-[calc(100vw-2rem)] gap-0 rounded-2xl p-0 shadow-[0_16px_40px_-18px_oklch(0.25_0.02_60/0.45)]">
         {open && (
           <DateRangePanel
             initial={value}
@@ -50,7 +50,7 @@ export function DateRangeFilter({
   );
 }
 
-function DateRangePanel({
+export function DateRangePanel({
   initial,
   semesters,
   onApply,
@@ -87,7 +87,7 @@ function DateRangePanel({
               setMonth(start);
             }}
             className={cn(
-              "h-9 rounded-lg border px-3 text-sm font-medium transition-colors",
+              "h-9 rounded-full border px-3.5 text-sm font-medium transition-colors",
               activeSemester?.slug === s.slug
                 ? "border-brand bg-brand-soft text-accent-foreground"
                 : "border-input hover:border-foreground/40",
@@ -120,7 +120,7 @@ function DateRangePanel({
         <button
           type="button"
           onClick={() => onApply(null)}
-          className="h-10 rounded-lg px-3 text-sm font-medium hover:bg-muted"
+          className="h-10 rounded-full px-4 text-sm font-medium hover:bg-muted"
         >
           Clear
         </button>
@@ -128,7 +128,7 @@ function DateRangePanel({
           type="button"
           disabled={!complete}
           onClick={() => from && to && onApply({ start: toISO(from), end: toISO(to) })}
-          className="h-10 rounded-lg bg-brand px-4 text-sm font-semibold text-brand-foreground active:scale-[0.98] disabled:opacity-50"
+          className="h-10 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground active:scale-[0.98] disabled:opacity-50"
         >
           Apply
         </button>

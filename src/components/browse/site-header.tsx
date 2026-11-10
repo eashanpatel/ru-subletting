@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { HeaderAccount, SignInLink } from "./header-account";
@@ -10,7 +10,8 @@ const NAV = [
   { href: "/my-listings", label: "My listings" },
 ];
 
-export function SiteHeader({ current = "/" }: { current?: string }) {
+/** `search` is the browse page's search pill; it shows in the header on wide screens. */
+export function SiteHeader({ current = "/", search }: { current?: string; search?: ReactNode }) {
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-rule bg-sheet/95 backdrop-blur-sm">
       <div className="mx-auto flex h-full max-w-[1600px] items-center gap-3 px-4 md:gap-8 md:px-7">
@@ -34,6 +35,8 @@ export function SiteHeader({ current = "/" }: { current?: string }) {
             </Link>
           ))}
         </nav>
+
+        {search && <div className="hidden min-w-0 flex-1 justify-center xl:flex">{search}</div>}
 
         <div className="ml-auto flex items-center gap-2">
           <Suspense fallback={<SignInLink />}>
