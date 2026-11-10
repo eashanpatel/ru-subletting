@@ -142,4 +142,4 @@ With no `.edu` requirement and no email verification, the MVP relies on:
 ## Open questions
 1. **Contact method:** is "the owner chooses whether to show email and/or phone, to logged-in users only" final for the MVP?
 3. **Landlord listings:** how they're labeled or told apart from student sublets
-4. **Permanent product name**
+4. **Permanent product name:** deferred until the product is done. It should be generic (no Rutgers reference) so it works at other campuses. Leading candidate: **Sojourn** (`sojournhousing.com` appeared unregistered on 2026-11-10; the short domains are taken).
