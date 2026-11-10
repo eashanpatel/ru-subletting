@@ -67,7 +67,7 @@ export function HeaderSearch({ reference, className }: { reference: ReferenceDat
             set={!!filters.dates}
           />
         </PopoverTrigger>
-        <PopoverContent align="start" sideOffset={10} className={cn(PANEL, "w-auto max-w-[calc(100vw-2rem)]")}>
+        <PopoverContent align="center" sideOffset={10} className={cn(PANEL, "w-auto max-w-[calc(100vw-2rem)]")}>
           {openWhen && (
             <DateRangePanel
               initial={filters.dates}
@@ -87,7 +87,7 @@ export function HeaderSearch({ reference, className }: { reference: ReferenceDat
         <PopoverTrigger className={SEGMENT} aria-label="Budget">
           <SegmentText label="Budget" value={priceSet ? priceSummary(filters.price) : "Any price"} set={priceSet} />
         </PopoverTrigger>
-        <PopoverContent align="start" sideOffset={10} className={cn(PANEL, "w-80 max-w-[calc(100vw-2rem)]")}>
+        <PopoverContent align="center" sideOffset={10} className={cn(PANEL, "w-80 max-w-[calc(100vw-2rem)]")}>
           {openBudget && (
             <PricePanel
               initial={filters.price}

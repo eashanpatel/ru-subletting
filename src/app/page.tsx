@@ -10,8 +10,8 @@ export default async function BrowsePage() {
     <>
       <SiteHeader
         search={
-          <Suspense fallback={<div className="h-[52px] w-full max-w-[460px] rounded-full border border-input bg-sheet" />}>
-            <HeaderSearch reference={reference} className="h-[52px] w-full max-w-[460px]" />
+          <Suspense fallback={<div className="h-[52px] w-full rounded-full border border-input bg-sheet" />}>
+            <HeaderSearch reference={reference} className="h-[52px] w-full" />
           </Suspense>
         }
       />

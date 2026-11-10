@@ -1,6 +1,7 @@
 import { type ReactNode, Suspense } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { HeaderAccount, SignInLink } from "./header-account";
 import { MobileMenu } from "./mobile-menu";
 
@@ -14,7 +15,14 @@ const NAV = [
 export function SiteHeader({ current = "/", search }: { current?: string; search?: ReactNode }) {
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-rule bg-sheet/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-full max-w-[1600px] items-center gap-3 px-4 md:gap-8 md:px-7">
+      {/* With a search pill, wide screens use three columns so the pill sits at the true center. */}
+      <div
+        className={cn(
+          "mx-auto flex h-full max-w-[1600px] items-center gap-3 px-4 md:gap-8 md:px-7",
+          search && "xl:grid xl:grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)]",
+        )}
+      >
+        <div className="flex min-w-0 items-center gap-3 md:gap-8">
         <Link
           href="/"
           className="shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight"
@@ -35,10 +43,11 @@ export function SiteHeader({ current = "/", search }: { current?: string; search
             </Link>
           ))}
         </nav>
+        </div>
 
-        {search && <div className="hidden min-w-0 flex-1 justify-center xl:flex">{search}</div>}
+        {search && <div className="hidden xl:block xl:w-[420px] 2xl:w-[460px]">{search}</div>}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 xl:justify-self-end">
           <Suspense fallback={<SignInLink />}>
             <HeaderAccount />
           </Suspense>

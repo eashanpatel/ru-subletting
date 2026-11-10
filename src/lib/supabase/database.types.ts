@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   graphql_public: {
     Tables: {
@@ -241,6 +241,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      listing_post_log: {
+        Row: {
+          created_at: string
+          id: number
+          listing_id: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          listing_id: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          listing_id?: string
+          owner_id?: string
+        }
+        Relationships: []
       }
       listings: {
         Row: {
@@ -547,6 +568,22 @@ export type Database = {
           address: string
           lat: number
           lng: number
+        }[]
+      }
+      get_posting_allowance: {
+        Args: never
+        Returns: {
+          day_left: number
+          month_left: number
+          next_post_at: string
+        }[]
+      }
+      posting_allowance_for: {
+        Args: { p_owner: string }
+        Returns: {
+          day_left: number
+          month_left: number
+          next_post_at: string
         }[]
       }
       save_listing: {

@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/browse/site-header";
 import { NewListing } from "@/components/post/post-listing";
 import { getReferenceData } from "@/lib/reference-data";
+import { PostingAllowance } from "@/components/post/posting-allowance";
 
 export const metadata: Metadata = { title: "Post a sublet | RU Subletting" };
 
@@ -15,7 +17,11 @@ export default async function NewListingPage() {
         <p className="mb-8 mt-1 max-w-[60ch] text-muted-foreground">
           Takes about five minutes. You can save a draft and finish later.
         </p>
-        <NewListing reference={reference} />
+        <Suspense fallback={<div className="h-96 animate-pulse rounded-lg bg-muted" />}>
+          <PostingAllowance>
+            <NewListing reference={reference} />
+          </PostingAllowance>
+        </Suspense>
       </main>
     </>
   );

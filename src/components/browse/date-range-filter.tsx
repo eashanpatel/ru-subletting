@@ -68,7 +68,6 @@ export function DateRangePanel({
 
   const from = draft?.from;
   const to = draft?.to;
-  const complete = !!from && !!to;
   const weeks = from && to ? Math.max(1, Math.round(differenceInCalendarDays(to, from) / 7)) : 0;
   const activeSemester =
     from && to ? semesters.find((s) => s.startsOn === toISO(from) && s.endsOn === toISO(to)) : undefined;
@@ -117,17 +116,19 @@ export function DateRangePanel({
               ? "Now pick your move-out date"
               : "Pick your move-in date"}
         </p>
+        {/* Reset only clears what's picked here; Apply with nothing picked means any dates. */}
         <button
           type="button"
-          onClick={() => onApply(null)}
-          className="h-10 rounded-full px-4 text-sm font-medium hover:bg-muted"
+          disabled={!from}
+          onClick={() => setDraft(undefined)}
+          className="h-10 rounded-full px-4 text-sm font-medium hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
         >
-          Clear
+          Reset
         </button>
         <button
           type="button"
-          disabled={!complete}
-          onClick={() => from && to && onApply({ start: toISO(from), end: toISO(to) })}
+          disabled={!!from && !to}
+          onClick={() => onApply(from && to ? { start: toISO(from), end: toISO(to) } : null)}
           className="h-10 rounded-full bg-brand px-5 text-sm font-semibold text-brand-foreground active:scale-[0.98] disabled:opacity-50"
         >
           Apply
