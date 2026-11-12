@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
@@ -29,7 +32,10 @@ export function ListingCard({
   onToggleSave,
   onHover,
   href,
+  pulse = 0,
 }: {
+  /** Increase to flash the card, e.g. after its map pin is clicked. */
+  pulse?: number;
   href?: string;
   listing: BrowseListing;
   semesters: Semester[];
@@ -46,9 +52,29 @@ export function ListingCard({
     .join(", ");
   const age = daysSince(listing.createdAt);
   const badge = STATUS_BADGE[listing.status];
+  const ref = useRef<HTMLElement>(null);
+
+  // A bright green ring that pulses three times, so the card picked on the map is easy to spot.
+  useEffect(() => {
+    const el = ref.current;
+    if (!pulse || !el) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ring = "oklch(0.7 0.19 138)";
+    const anim = el.animate(
+      reduce
+        ? [{ boxShadow: `0 0 0 4px ${ring}` }, { boxShadow: `0 0 0 4px ${ring}` }]
+        : [
+            { boxShadow: `0 0 0 4px ${ring}, 0 0 0 0 oklch(0.7 0.19 138 / 0.6)` },
+            { boxShadow: `0 0 0 4px ${ring}, 0 0 0 20px oklch(0.7 0.19 138 / 0)` },
+          ],
+      { duration: reduce ? 1800 : 700, iterations: reduce ? 1 : 3, easing: "ease-out" },
+    );
+    return () => anim.cancel();
+  }, [pulse]);
 
   return (
     <article
+      ref={ref}
       id={`listing-${listing.id}`}
       onMouseEnter={() => onHover?.(true)}
       onMouseLeave={() => onHover?.(false)}

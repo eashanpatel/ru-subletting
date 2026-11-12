@@ -14,11 +14,15 @@ type Pin = { key: string; items: BrowseListing[]; lng: number; lat: number; el: 
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
+// Pins never change size or position: hover and selection only change colour, so a pin
+// stays exactly under the cursor. Mapbox moves pins with `transform`, so nothing here
+// may animate or set it.
 const PIN_BASE =
-  "rounded-md border px-2 py-1 font-mono text-sm font-semibold leading-none shadow-sm transition-[background-color,color,scale] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
-const PIN_DEFAULT = "border-foreground/15 bg-sheet text-foreground hover:border-brand";
-const PIN_SAVED = "border-brand bg-brand-soft text-accent-foreground";
-const PIN_ACTIVE = "z-10 scale-110 border-brand bg-brand text-brand-foreground";
+  "rounded-md border px-2 py-1 font-mono text-sm font-semibold leading-none shadow-sm transition-colors duration-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
+const PIN_HOVER = "hover:z-10 hover:border-brand hover:bg-brand hover:text-brand-foreground";
+const PIN_DEFAULT = cn("border-foreground/15 bg-sheet text-foreground", PIN_HOVER);
+const PIN_SAVED = cn("border-brand bg-brand-soft text-accent-foreground", PIN_HOVER);
+const PIN_ACTIVE = "z-10 border-brand bg-brand text-brand-foreground";
 const PIN_TAKEN = "border-rule bg-muted text-muted-foreground line-through";
 const CLUSTER_BASE =
   "flex size-14 flex-col items-center justify-center rounded-full border-2 border-brand leading-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
@@ -28,6 +32,7 @@ export function MapView({
   listings,
   campuses,
   activeId,
+  selectedId,
   savedIds,
   areaActive,
   onPinHover,
@@ -39,6 +44,8 @@ export function MapView({
   listings: BrowseListing[];
   campuses: Campus[];
   activeId: string | null;
+  /** The pin last clicked; it stays green until another is clicked. */
+  selectedId: string | null;
   savedIds: Set<string>;
   areaActive: boolean;
   onPinHover: (id: string | null) => void;
@@ -55,8 +62,8 @@ export function MapView({
   const [moved, setMoved] = useState(false);
 
   // Latest values for marker event handlers, without re-creating markers.
-  const latest = useRef({ listings, activeId, savedIds, onPinHover, onPinClick });
-  latest.current = { listings, activeId, savedIds, onPinHover, onPinClick };
+  const latest = useRef({ listings, activeId, selectedId, savedIds, onPinHover, onPinClick });
+  latest.current = { listings, activeId, selectedId, savedIds, onPinHover, onPinClick };
 
   // Create the map once its container has a real size (it starts hidden
   // behind the list on phones), then keep it sized to the container.
@@ -220,25 +227,26 @@ export function MapView({
 
   // Restyle pins for hover, focus, and saved state without rebuilding them.
   function paint() {
-    const { activeId: active, savedIds: saved } = latest.current;
+    const { activeId: hovered, selectedId: selected, savedIds: saved } = latest.current;
+    const isOn = (id: string) => id === hovered || id === selected;
     for (const p of pinsRef.current) {
       // Keep Mapbox's own marker classes: they position the pin and give it its own
       // GPU layer (will-change: transform), so it moves with the map while dragging.
       const own = [...p.el.classList].filter((c) => c.startsWith("mapboxgl-"));
       if (p.items.length > 1) {
-        const on = p.items.some((l) => l.id === active);
+        const on = p.items.some((l) => isOn(l.id));
         p.el.className = cn(own, CLUSTER_BASE, on ? "bg-brand text-brand-foreground" : "bg-sheet text-foreground hover:bg-brand-soft");
       } else {
         const l = p.items[0];
         p.el.className = cn(
           own,
           PIN_BASE,
-          l.status === "taken" ? PIN_TAKEN : l.id === active ? PIN_ACTIVE : saved.has(l.id) ? PIN_SAVED : PIN_DEFAULT,
+          l.status === "taken" ? PIN_TAKEN : isOn(l.id) ? PIN_ACTIVE : saved.has(l.id) ? PIN_SAVED : PIN_DEFAULT,
         );
       }
     }
   }
-  useEffect(paint, [activeId, savedIds]);
+  useEffect(paint, [activeId, selectedId, savedIds]);
 
   function searchHere() {
     const b = mapRef.current?.getBounds();

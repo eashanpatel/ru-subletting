@@ -44,6 +44,9 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
   const setBounds = (bounds: Bounds | null) => update({ bounds });
   const setSort = (sort: Sort) => update({ sort });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  // The listing picked from a map pin, and a counter that replays the card's pulse.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pulse, setPulse] = useState<{ id: string; n: number } | null>(null);
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [peekId, setPeekId] = useState<string | null>(null);
   const wide = useMediaQuery("(min-width: 1024px)");
@@ -116,14 +119,24 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
 
   // Desktop: scroll to the card. Phone map: show a preview on the map instead of leaving it.
   function focusListing(id: string) {
-    setHoveredId(id);
+    setSelectedId(id);
     if (!wide && mobileView === "map") {
       setPeekId(id);
       return;
     }
-    requestAnimationFrame(() =>
-      document.getElementById(`listing-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }),
-    );
+    const card = document.getElementById(`listing-${id}`);
+    if (!card) return;
+    // Pulse once the scroll settles, so the card is in view when it flashes.
+    let done = false;
+    const flash = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("scrollend", flash);
+      setPulse((p) => ({ id, n: (p?.n ?? 0) + 1 }));
+    };
+    window.addEventListener("scrollend", flash, { once: true });
+    window.setTimeout(flash, 700); // browsers without scrollend, or no scroll needed
+    requestAnimationFrame(() => card.scrollIntoView({ behavior: "smooth", block: "center" }));
   }
 
   return (
@@ -250,7 +263,8 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
                   semesters={semesters}
                   range={dates}
                   saved={savedIds.has(l.id)}
-                  active={hoveredId === l.id}
+                  active={hoveredId === l.id || selectedId === l.id}
+                  pulse={pulse?.id === l.id ? pulse.n : 0}
                   onToggleSave={() => toggleSave(l.id)}
                   onHover={(h) => setHoveredId(h ? l.id : null)}
                 />
@@ -273,6 +287,7 @@ export function BrowseView({ reference }: { reference: ReferenceData }) {
             listings={results}
             campuses={campuses}
             activeId={hoveredId}
+            selectedId={selectedId}
             savedIds={savedIds}
             areaActive={!!bounds}
             onPinHover={setHoveredId}
