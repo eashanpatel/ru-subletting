@@ -59,6 +59,7 @@ export type Database = {
       }
       campuses: {
         Row: {
+          boundary: unknown
           id: string
           location: unknown
           name: string
@@ -66,6 +67,7 @@ export type Database = {
           slug: string
         }
         Insert: {
+          boundary?: unknown
           id?: string
           location: unknown
           name: string
@@ -73,6 +75,7 @@ export type Database = {
           slug: string
         }
         Update: {
+          boundary?: unknown
           id?: string
           location?: unknown
           name?: string
