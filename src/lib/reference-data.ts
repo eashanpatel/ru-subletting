@@ -1,6 +1,6 @@
 import { cacheLife } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
-import { type ReferenceData, SCHOOL_SLUG } from "@/lib/browse";
+import { type CampusBoundary, type ReferenceData, SCHOOL_SLUG } from "@/lib/browse";
 
 /** Campuses, semesters, and amenities. Changes rarely, so it is cached. */
 export async function getReferenceData(): Promise<ReferenceData> {
@@ -25,7 +25,14 @@ export async function getReferenceData(): Promise<ReferenceData> {
   if (amenities.error) throw amenities.error;
 
   return {
-    campuses: campuses.data.map((c) => ({ slug: c.slug, name: c.name, lat: c.lat, lng: c.lng })),
+    campuses: campuses.data.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      lat: c.lat,
+      lng: c.lng,
+      // Present once the campus_boundaries migration is applied; the maps fall back to circles without it.
+      boundary: (c as { boundary?: CampusBoundary | null }).boundary ?? null,
+    })),
     semesters: semesters.data.map((s) => ({ slug: s.slug, label: s.label, startsOn: s.starts_on, endsOn: s.ends_on })),
     amenities: amenities.data,
   };

@@ -6,16 +6,16 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Minus, Plus, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type BrowseListing, type Campus, formatPrice } from "@/lib/browse";
+import { campusLabelOffset, campusZones } from "@/lib/campus-zones";
 
 export type Bounds = { west: number; south: number; east: number; north: number };
 
 type Pin = { key: string; items: BrowseListing[]; lng: number; lat: number; el: HTMLButtonElement; marker: Marker };
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-const CAMPUS_RADIUS_M = 650;
 
 const PIN_BASE =
-  "rounded-md border px-2 py-1 font-mono text-sm font-semibold leading-none shadow-sm transition-[background-color,color,transform] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
+  "rounded-md border px-2 py-1 font-mono text-sm font-semibold leading-none shadow-sm transition-[background-color,color,scale] duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
 const PIN_DEFAULT = "border-foreground/15 bg-sheet text-foreground hover:border-brand";
 const PIN_SAVED = "border-brand bg-brand-soft text-accent-foreground";
 const PIN_ACTIVE = "z-10 scale-110 border-brand bg-brand text-brand-foreground";
@@ -23,15 +23,6 @@ const PIN_TAKEN = "border-rule bg-muted text-muted-foreground line-through";
 const CLUSTER_BASE =
   "flex size-14 flex-col items-center justify-center rounded-full border-2 border-brand leading-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]";
 
-/** A circle polygon around a point, for campus zones. */
-function circle(lng: number, lat: number, radiusM: number, steps = 64): [number, number][] {
-  const dLat = radiusM / 111_320;
-  const dLng = radiusM / (111_320 * Math.cos((lat * Math.PI) / 180));
-  return Array.from({ length: steps + 1 }, (_, i) => {
-    const a = (i / steps) * 2 * Math.PI;
-    return [lng + dLng * Math.cos(a), lat + dLat * Math.sin(a)];
-  });
-}
 
 export function MapView({
   listings,
@@ -100,28 +91,24 @@ export function MapView({
         mapRef.current = map;
 
         map.on("load", () => {
-          map!.addSource("campuses", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: campuses.map((c) => ({
-                type: "Feature",
-                properties: { name: c.name },
-                geometry: { type: "Polygon", coordinates: [circle(c.lng, c.lat, CAMPUS_RADIUS_M)] },
-              })),
-            },
-          });
+          const borders = campuses.some((c) => c.boundary);
+          map!.addSource("campuses", { type: "geojson", data: campusZones(campuses) });
           map!.addLayer({
             id: "campus-fill",
             type: "fill",
             source: "campuses",
-            paint: { "fill-color": "#6b7a3a", "fill-opacity": 0.07 },
+            paint: { "fill-color": "#6b7a3a", "fill-opacity": borders ? 0.09 : 0.07 },
           });
           map!.addLayer({
             id: "campus-outline",
             type: "line",
             source: "campuses",
-            paint: { "line-color": "#6b7a3a", "line-opacity": 0.45, "line-width": 1.25, "line-dasharray": [2, 2] },
+            paint: {
+              "line-color": "#6b7a3a",
+              "line-opacity": borders ? 0.6 : 0.45,
+              "line-width": borders ? 1.5 : 1.25,
+              ...(borders ? {} : { "line-dasharray": [2, 2] }),
+            },
           });
           map!.addLayer({
             id: "campus-label",
@@ -131,7 +118,7 @@ export function MapView({
               "text-field": ["get", "name"],
               "text-size": 12,
               "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
-              "text-offset": [0, -3.6],
+              "text-offset": campusLabelOffset(campuses),
             },
             paint: { "text-color": "#4a5428", "text-halo-color": "#ffffff", "text-halo-width": 1.5 },
           });
@@ -235,12 +222,16 @@ export function MapView({
   function paint() {
     const { activeId: active, savedIds: saved } = latest.current;
     for (const p of pinsRef.current) {
+      // Keep Mapbox's own marker classes: they position the pin and give it its own
+      // GPU layer (will-change: transform), so it moves with the map while dragging.
+      const own = [...p.el.classList].filter((c) => c.startsWith("mapboxgl-"));
       if (p.items.length > 1) {
         const on = p.items.some((l) => l.id === active);
-        p.el.className = cn(CLUSTER_BASE, on ? "bg-brand text-brand-foreground" : "bg-sheet text-foreground hover:bg-brand-soft");
+        p.el.className = cn(own, CLUSTER_BASE, on ? "bg-brand text-brand-foreground" : "bg-sheet text-foreground hover:bg-brand-soft");
       } else {
         const l = p.items[0];
         p.el.className = cn(
+          own,
           PIN_BASE,
           l.status === "taken" ? PIN_TAKEN : l.id === active ? PIN_ACTIVE : saved.has(l.id) ? PIN_SAVED : PIN_DEFAULT,
         );

@@ -520,6 +520,7 @@ export type Database = {
       campus_points: {
         Args: { p_school: string }
         Returns: {
+          boundary: Json
           lat: number
           lng: number
           name: string

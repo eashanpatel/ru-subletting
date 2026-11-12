@@ -7,7 +7,9 @@ type SearchRow = Database["public"]["Functions"]["search_listings"]["Returns"][n
 
 export const SCHOOL_SLUG = "rutgers-nb";
 
-export type Campus = { slug: string; name: string; lat: number; lng: number };
+/** A campus border as a GeoJSON polygon ring list ([lng, lat] pairs). */
+export type CampusBoundary = { type: "Polygon"; coordinates: [number, number][][] };
+export type Campus = { slug: string; name: string; lat: number; lng: number; boundary?: CampusBoundary | null };
 export type Semester = { slug: string; label: string; startsOn: string; endsOn: string };
 export type Amenity = { slug: string; label: string };
 export type ReferenceData = { campuses: Campus[]; semesters: Semester[]; amenities: Amenity[] };

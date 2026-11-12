@@ -70,6 +70,7 @@ Server components handle the first render of pages that need SEO and link previe
 
 ## Rutgers-specific features
 - Campus distance filters: College Ave, Busch, Livingston, Cook/Douglass, and optionally Newark and Camden
+- Campus borders: official outlines for Busch, Livingston, College Ave, and Cook/Douglass are stored on `campuses.boundary` (migration `20261111150000_campus_boundaries`) and drawn on the browse and listing maps. A campus without a border falls back to a 650 m circle. Commute times are still measured to each campus's center point.
 - Neighborhood tags that students recognize, such as Easton Ave, Hamilton St, and Highland Park
 - Semester presets tied to the Rutgers academic calendar, such as "Summer 2027" and "Spring semester"
 - *Later:* Rutgers bus route info for each listing

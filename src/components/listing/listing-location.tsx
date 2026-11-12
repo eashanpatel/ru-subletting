@@ -9,19 +9,11 @@ import { MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import type { Campus } from "@/lib/browse";
+import { campusLabelOffset, campusZones, circle } from "@/lib/campus-zones";
 import type { AddressVisibility } from "@/lib/listing-form";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const APPROX_RADIUS_M = 220;
-
-function circle(lng: number, lat: number, radiusM: number, steps = 64): [number, number][] {
-  const dLat = radiusM / 111_320;
-  const dLng = radiusM / (111_320 * Math.cos((lat * Math.PI) / 180));
-  return Array.from({ length: steps + 1 }, (_, i) => {
-    const a = (i / steps) * 2 * Math.PI;
-    return [lng + dLng * Math.cos(a), lat + dLat * Math.sin(a)];
-  });
-}
 
 /**
  * Where the place is. Everyone sees an approximate area; signed-in visitors
@@ -86,29 +78,25 @@ export function ListingLocation({
       mapRef.current = map;
 
       map.on("load", () => {
-        map!.addSource("campuses", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: campuses.map((c) => ({
-              type: "Feature",
-              properties: { name: c.name },
-              geometry: { type: "Polygon", coordinates: [circle(c.lng, c.lat, 650)] },
-            })),
-          },
-        });
-        map!.addLayer({ id: "campus-fill", type: "fill", source: "campuses", paint: { "fill-color": "#6b7a3a", "fill-opacity": 0.06 } });
+        const borders = campuses.some((c) => c.boundary);
+        map!.addSource("campuses", { type: "geojson", data: campusZones(campuses) });
+        map!.addLayer({ id: "campus-fill", type: "fill", source: "campuses", paint: { "fill-color": "#6b7a3a", "fill-opacity": borders ? 0.08 : 0.06 } });
         map!.addLayer({
           id: "campus-outline",
           type: "line",
           source: "campuses",
-          paint: { "line-color": "#6b7a3a", "line-opacity": 0.4, "line-width": 1.25, "line-dasharray": [2, 2] },
+          paint: {
+            "line-color": "#6b7a3a",
+            "line-opacity": borders ? 0.55 : 0.4,
+            "line-width": borders ? 1.5 : 1.25,
+            ...(borders ? {} : { "line-dasharray": [2, 2] }),
+          },
         });
         map!.addLayer({
           id: "campus-label",
           type: "symbol",
           source: "campuses",
-          layout: { "text-field": ["get", "name"], "text-size": 12, "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"], "text-offset": [0, -3.6] },
+          layout: { "text-field": ["get", "name"], "text-size": 12, "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"], "text-offset": campusLabelOffset(campuses) },
           paint: { "text-color": "#4a5428", "text-halo-color": "#ffffff", "text-halo-width": 1.5 },
         });
         map!.addSource("approx", {
